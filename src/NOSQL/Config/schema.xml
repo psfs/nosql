@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database name="NOSQL" defaultIdMethod="native" namespace="NOSQL\Models" tablePrefix="NOSQL_">
+    <vendor type="mysql">
+        <parameter name="Engine" value="InnoDB"/>
+        <parameter name="Charset" value="utf8"/>
+        <parameter name="Collate" value="utf8_unicode_ci"/>
+    </vendor>
+</database>

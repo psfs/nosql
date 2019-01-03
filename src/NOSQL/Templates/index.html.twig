@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+{% block styles %}
+    {% styles
+    '@NOSQL/css/styles.css'
+    %}{% styles %}
+{% endblock styles %}
+{% block body_header %}
+    <div class='page-header'>
+        <h1>{{ 'NOSQL composer'|trans }}</h1>
+    </div>
+{% endblock body_header %}
+{% block body_content %}
+    <div class='container-fluid' ng-controller="NOSQLCtrl" ng-cloak>
+        <div class="row" ng-show="hasMessage">
+            <p class="alert alert-success" ng-bind="message"></p>
+        </div>
+        <div class="row" ng-hide="waiting">
+            <div class="form-group col-xs-12" ng-if="domains.length > 0">
+                <label for="domain" class="control-label" ng-show="!domain">{{ "Selecciona un módulo del código"|trans }}</label>
+                <div class="input-group">
+                    <select class="form-control" name="domain" id="domain" ng-model="domain" ng-change="loadCollections(domain)">
+                        <option ng-repeat="module in domains" ng-value="module" ng-bind="module"></option>
+                    </select>
+                    <div class="btn btn-danger input-group-addon" ng-click="clearStorage()"data-toggle="tooltip"
+                         title="{{ 'Limpiar el almacenamiento del navegador para cargar directamente desde el código'|trans }}">
+                        <i class="fa fa-trash"></i>&nbsp;{{ "Limpiar almacenamiento local"|trans }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 text-center" ng-if="domains.length == 0">
+                <a href="{{ path('admin-module', true) }}" title="{{ "Crear un nuevo módulo"|trans }}" >{{ "Primero tienes que crear un módulo"|trans }}</a>
+            </div>
+            <div class="list-group col-xs-12 col-sm-6" ng-show="domain">
+                <a class="list-group-item btn" ng-click="createCollection()" ng-hide="loading" data-toggle="tooltip"
+                   title="{{ 'Crea una colección nueva para un dominio dado'|trans }}">
+                    <i class="fa fa-plus-circle"></i>&nbsp;{{ "Crear colección"|trans }}
+                </a>
+                <div class="list-group-item text-center" ng-show="loading">
+                    <i class="fa fa-cog fa-spin"></i>&nbsp;{{ "Cargando..."|trans }}
+                </div>
+                <a class="list-group-item" ng-click="editCollection(table)" ng-repeat="table in collections"
+                   ng-bind="table.name" ng-class="{'active':table.id === collection.id}"></a>
+                <a class="list-group-item btn" ng-click="saveAndCreate()" ng-hide="loading" data-toggle="tooltip"
+                   title="{{ 'Guarda las colecciones para un dominio dado y genera las clases necesarias para su uso'|trans }}">
+                    <i class="fa fa-database"></i>&nbsp;{{ "Guardar colecciones y generar código"|trans }}
+                </a>
+            </div>
+            <div class="col-xs-12 col-sm-6" ng-show="domain">
+                <div class="alert alert-warning text-center" ng-show="!collection">{{ "Seleccciona primero una colección o créala desde 0"|trans }}</div>
+                <form class="form-horizontal" ng-if="collection" onsubmit="return false;" novalidate>
+                    <h2 class="form-group">
+                        <div class="input-group">
+                            <input type="text" class="form-control" ng-model="collection.name" required>
+                            <div class="btn btn-primary input-group-addon" ng-click="addNewProperty()"
+                                 data-toggle="tooltip" title="{{ 'Añade una nueva propiedad a la colección'|trans }}">
+                                <i class="fa fa-plus-circle"></i>&nbsp;{{ "Nueva propiedad"|trans }}
+                            </div>
+                            <div class="btn btn-danger input-group-addon" ng-click="removeCollection($index)"
+                                 data-toggle="tooltip" title="{{ 'Elimina la colección del dominio'|trans }}">
+                                <i class="fa fa-trash"></i>&nbsp;{{ "Eliminar colección"|trans }}
+                            </div>
+                            <div class="btn btn-success input-group-addon" ng-click="storeCollections()"
+                                 data-toggle="tooltip" title="{{ 'Almacenar temporalmente en el navegador'|trans }}">
+                                <i class="fa fa-save"></i>
+                            </div>
+                        </div>
+                    </h2>
+                    <property data-types="types" data-model="property" data-index="$index" ng-repeat="property in collection.properties"></property>
+                </form>
+            </div>
+        </div>
+        <div class="row text-center" ng-show="waiting">
+            <p class="well well-lg">
+                <i class="fa fa-cog fa-spin"></i>&nbsp;{{ "Espera por favor..."|trans }}
+            </p>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block scripts %}
+    <script type="text/ng-template" id="/js/composer/property.html">{% include '@NOSQL/composer/property.html.twig' %}</script>
+    {% scripts
+    '@ROOT/js/api/api-srv.js'
+    '@NOSQL/js/app.js'
+    '@NOSQL/js/composer/property.js'
+    %}{% endscript %}
+{% endblock scripts %}
+
