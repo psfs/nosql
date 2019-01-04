@@ -1,7 +1,12 @@
 <?php
 namespace NOSQL\Services;
 
+use MongoDB\Model\BSONDocument;
 use NOSQL\Dto\CollectionDto;
+use NOSQL\Dto\Validation\EnumPropertyDto;
+use NOSQL\Dto\Validation\JsonSchemaDto;
+use NOSQL\Dto\Validation\NumberPropertyDto;
+use NOSQL\Dto\Validation\StringPropertyDto;
 use NOSQL\Services\base\NOSQLBase;
 use PSFS\base\Cache;
 use PSFS\base\Logger;
@@ -45,6 +50,9 @@ class NOSQLService extends Service {
         $this->types = $types;
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     private function extractTypes() {
         $baseClass = new \ReflectionClass(NOSQLBase::class);
         if(null !== $baseClass) {
@@ -56,6 +64,9 @@ class NOSQLService extends Service {
         }
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function init()
     {
         parent::init();
@@ -105,7 +116,9 @@ class NOSQLService extends Service {
         $files = [
             '@NOSQL/generator/model.base.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'base',
             '@NOSQL/generator/model.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Models',
-            '@NOSQL/generator/api.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api'
+            '@NOSQL/generator/api.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api',
+            '@NOSQL/generator/api.base.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api' . DIRECTORY_SEPARATOR . 'base',
+            '@NOSQL/generator/dto.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Dto',
         ];
         foreach($collections as $raw) {
             $collection = new CollectionDto(false);
@@ -115,8 +128,13 @@ class NOSQLService extends Service {
                 $templateDump = $tpl->dump($template, [
                     'domain' => $module,
                     'model' => $collection->name,
+                    'properties' => $collection->properties,
                 ]);
-                $this->writeTemplateToFile($templateDump, $path . DIRECTORY_SEPARATOR . $collection->name . '.php', false !== strpos($template, 'base'));
+                $force = false;
+                if(false !== strpos($template, 'dto') || false !== strpos($template, 'base')) {
+                    $force = true;
+                }
+                $this->writeTemplateToFile($templateDump, $path . DIRECTORY_SEPARATOR . $collection->name . '.php', $force);
             }
         }
     }
@@ -142,5 +160,57 @@ class NOSQLService extends Service {
             Logger::log($filename . t(' not exists or cant write'), LOG_ERR);
         }
         return $created;
+    }
+
+    /**
+     * @param $module
+     * @throws \PSFS\base\exception\GeneratorException
+     */
+    public function syncCollections($module) {
+        $db = ParserService::getInstance()->createConnection($module);
+        $collections = $this->getCollections($module);
+        $success = true;
+        foreach($collections as $raw) {
+            $jsonSchema = new JsonSchemaDto(false);
+            foreach($raw['properties'] as $rawProperty) {
+                switch($rawProperty['type']) {
+                    case NOSQLBase::NOSQL_TYPE_INTEGER:
+                    case NOSQLBase::NOSQL_TYPE_DOUBLE:
+                    case NOSQLBase::NOSQL_TYPE_LONG:
+                        $property = new NumberPropertyDto(false);
+                    break;
+                    case NOSQLBase::NOSQL_TYPE_ENUM:
+                        $property = new EnumPropertyDto(false);
+                        $property->enum = explode('|', $rawProperty['enum']);
+                    break;
+                    default:
+                        $property = new StringPropertyDto(false);
+                    break;
+                }
+                $property->bsonType = $rawProperty['type'];
+                $property->description = $rawProperty['description'];
+                if($rawProperty['required']) {
+                    $jsonSchema->required[] = $rawProperty['name'];
+                }
+                $jsonSchema->properties[$rawProperty['name']] = $property->toArray();
+            }
+            try {
+                /** @var BSONDocument $result */
+                $result = $db->createCollection($raw['name'], [
+                    'validation' => [
+                        '$jsonSchema' => $jsonSchema->toArray(),
+                    ]
+                ]);
+                $stdClass = $result->bsonSerialize();
+                if(!property_exists($stdClass, 'ok') && $stdClass->ok < 1) {
+                    $success = false;
+                }
+            } catch(\Exception $exception) {
+                if($exception->getCode() !== 48) {
+                    $success = false;
+                }
+            }
+        }
+        return $success;
     }
 }

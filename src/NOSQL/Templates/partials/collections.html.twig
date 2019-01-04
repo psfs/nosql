@@ -1,0 +1,19 @@
+<div class="list-group col-xs-12 col-sm-6" ng-show="domain">
+    <a class="list-group-item btn list-group-item-info" ng-click="createCollection()" ng-hide="loading" data-toggle="tooltip"
+       title="{{ 'Crea una colección nueva para un dominio dado'|trans }}">
+        <i class="fa fa-plus-circle"></i>&nbsp;{{ "Crear colección"|trans }}
+    </a>
+    <a class="list-group-item btn list-group-item-success" ng-click="saveAndCreate()" ng-hide="loading || collections.length == 0" data-toggle="tooltip"
+       title="{{ 'Guarda las colecciones para un dominio dado y genera las clases necesarias para su uso'|trans }}">
+        <i class="fa fa-database"></i>&nbsp;{{ "Guardar colecciones y generar código"|trans }}
+    </a>
+    <a class="list-group-item btn list-group-item-warning" ng-click="syncCollections()" ng-hide="loading || collections.length == 0" data-toggle="tooltip"
+       title="{{ 'Sincroniza y valida las coleciones'|trans }}">
+        <i class="fa fa-refresh"></i>&nbsp;{{ "Sincronizar colecciones"|trans }}
+    </a>
+    <div class="list-group-item text-center" ng-show="loading">
+        <i class="fa fa-cog fa-spin"></i>&nbsp;{{ "Cargando..."|trans }}
+    </div>
+    <a class="list-group-item" ng-click="editCollection(table)" ng-repeat="table in collections"
+       ng-bind="table.name" ng-class="{'active':table.id === collection.id}"></a>
+</div>

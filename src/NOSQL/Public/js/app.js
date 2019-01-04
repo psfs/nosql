@@ -102,12 +102,19 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
                 name: 'new_' + _ts,
                 properties: []
             });
+            for(let i in $scope.collections) {
+                let collection = $scope.collections[i];
+                if(collection.id === _ts) {
+                    $scope.editCollection(collection);
+                    break;
+                }
+            }
         };
 
         $scope.removeCollection = (index) => {
             $scope.collection = null;
             $scope.collections.splice(index, 1);
-            $scope.storeCollections();
+            $scope.storeCollections(true);
         };
 
         $scope.editCollection = (collection) => {
@@ -122,17 +129,47 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
             $msgSrv.send('load.ui');
         };
 
-        $scope.storeCollections = () => {
+        $scope.storeCollections = (hideAlert) => {
+            hideAlert = hideAlert || false;
             if(localStorage) {
                 localStorage.setItem($scope.domain.toLowerCase() + '.collections', JSON.stringify($scope.collections));
+                if(!hideAlert) {
+                    bootbox.alert(translations['collection_stored_successfull']);
+                }
+            } else if(!hideAlert) {
+                bootbox.alert(translations['collection_stored_fail']);
             }
         };
 
         $scope.saveAndCreate = () => {
             $scope.waiting = true;
             $httpSrv.$put('/NOSQL/Api/__admin/' + $scope.domain + '/collections', $scope.collections)
+                .then((response) => {
+                    if(response.data.success) {
+                        bootbox.alert(translations['domain_generated_success']);
+                    } else {
+                        bootbox.alert(translations['domain_generated_fail']);
+                    }
+                }, () => bootbox.alert(translations['domain_generated_fail']))
                 .finally(() => {
                     $msgSrv.send('nosql.collections.saved');
+                    $scope.waiting = false;
+                    $msgSrv.send('load.ui');
+                });
+        };
+
+        $scope.syncCollections = () => {
+            $scope.waiting = true;
+            $httpSrv.$post('/NOSQL/Api/__admin/' + $scope.domain + '/sync')
+                .then((response) => {
+                    if(response.data.success) {
+                        bootbox.alert(translations['domain_sync_success']);
+                    } else {
+                        bootbox.alert(translations['domain_sync_fail']);
+                    }
+                }, () => bootbox.alert(translations['domain_sync_fail']))
+                .finally(() => {
+                    $msgSrv.send('nosql.collections.sync');
                     $scope.waiting = false;
                     $msgSrv.send('load.ui');
                 });

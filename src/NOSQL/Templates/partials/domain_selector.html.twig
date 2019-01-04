@@ -1,0 +1,15 @@
+<div class="form-group col-xs-12" ng-if="domains.length > 0">
+    <label for="domain" class="control-label" ng-show="!domain">{{ "Selecciona un módulo del código"|trans }}</label>
+    <div class="input-group">
+        <select class="form-control" name="domain" id="domain" ng-model="domain" ng-change="loadCollections(domain)">
+            <option ng-repeat="module in domains" ng-value="module" ng-bind="module"></option>
+        </select>
+        <div class="btn btn-danger input-group-addon" ng-click="clearStorage()"data-toggle="tooltip"
+             title="{{ 'Limpiar el almacenamiento del navegador para cargar directamente desde el código'|trans }}">
+            <i class="fa fa-trash"></i>&nbsp;{{ "Limpiar almacenamiento local"|trans }}
+        </div>
+    </div>
+</div>
+<div class="col-xs-12 text-center" ng-if="domains.length == 0">
+    <a href="{{ path('admin-module', true) }}" title="{{ "Crear un nuevo módulo"|trans }}" >{{ "Primero tienes que crear un módulo"|trans }}</a>
+</div>

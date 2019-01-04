@@ -50,7 +50,7 @@ class NOSQL extends CustomApi {
      * @param string $module
      * @payload \NOSQL\Dto\CollectionDto[]
      * @route /{__DOMAIN__}/APi/{__API__}/{module}/collections
-     * @return \PSFS\base\dto\JsonResponse(data=array)
+     * @return \PSFS\base\dto\JsonResponse(data=boolean)
      */
     public function storeCollections($module) {
         $success = true;
@@ -62,7 +62,25 @@ class NOSQL extends CustomApi {
             $code = 400;
             Logger::log($exception->getMessage(), LOG_WARNING);
         }
-        return $this->json(new JsonResponse(null, $success), $code);
+        return $this->json(new JsonResponse($success, $success), $code);
+    }
+
+    /**
+     * @POST
+     * @param string $module
+     * @route /{__DOMAIN__}/APi/{__API__}/{module}/sync
+     * @return \PSFS\base\dto\JsonResponse(data=boolean)
+     */
+    public function syncCollections($module) {
+        $code = 200;
+        try {
+            $success = $this->srv->syncCollections($module);
+        } catch(\Exception $exception) {
+            $success = false;
+            $code = 400;
+            Logger::log($exception->getMessage(), LOG_WARNING);
+        }
+        return $this->json(new JsonResponse($success, $success), $code);
 
     }
 }

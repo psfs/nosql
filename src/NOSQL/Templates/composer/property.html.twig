@@ -1,5 +1,5 @@
 <fieldset class="property col-xs-12" ng-cloak>
-    <legend>
+    <legend data-toggle="tooltip" title="{{ "{{ model.description }}" }}">
         <span ng-bind="getPropertyLegend()"></span>&nbsp;
         <i class="fa" ng-class="{'fa-edit':!show,'fa-eye':show}" ng-click="togglePropertyForm()"></i>
         <i class="fa fa-trash" ng-click="removeProperty()"></i>

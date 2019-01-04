@@ -1,0 +1,100 @@
+<?php
+namespace {{ domain }}\Api\base;
+
+use \NOSQL\Api\base\NOSQLBase;
+
+/**
+ * Class {{ model }}
+ * @package {{ domain }}\Models
+ * Generated at [{{ ""|date("Y-m-d H:i:s") }}]
+ */
+abstract class {{ model }} extends NOSQLBase {
+    /**
+    * @label Get list of {__API__} documents filtered
+    * @GET
+    * @CACHE 600
+    * @ROUTE /{__DOMAIN__}/api/{__API__}
+    *
+    * @return \PSFS\base\dto\JsonResponse(data=[\{{ domain }}\Dto\{{ model }}])
+    */
+    public function modelList()
+    {
+        return parent::modelList();
+    }
+
+    /**
+    * @label Get unique document for {__API__}
+    *
+    * @GET
+    * @CACHE 600
+    * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
+    *
+    * @param int $pk
+    *
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    */
+    public function get($pk)
+    {
+        return parent::get($pk);
+    }
+
+    /**
+    * @label Delete {__API__} document
+    *
+    * @DELETE
+    * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
+    *
+    * @param string $pk
+    *
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    */
+    public function delete($pk = NULL)
+    {
+        return parent::delete($pk);
+    }
+
+    /**
+    * @label Create a new {__API__} document
+    *
+    * @POST
+    * @PAYLOAD \{{ domain }}\Dto\{{ model }}
+    * @ROUTE /{__DOMAIN__}/api/{__API__}
+    *
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    */
+    public function post()
+    {
+        return parent::post();
+    }
+
+    /**
+    * @label Modify {__API__} document
+    *
+    * @PUT
+    * @PAYLOAD \{{ domain }}\Dto\{{ model }}
+    * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
+    *
+    * @param string $pk
+    *
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    *
+    */
+    public function put($pk)
+    {
+        return parent::put($pk);
+    }
+
+    /**
+    * @label Bulk insert for {__API__} documents
+    * @POST
+    * @route /{__DOMAIN__}/api/{__API__}s
+    *
+    * @payload [\{{ domain }}\Dto\{{ model }}]
+    * @return \PSFS\base\dto\JsonResponse(data=[\{{ domain }}\Dto\{{ model }}])
+    */
+    public function bulk()
+    {
+        return parent::bulk();
+    }
+}
+

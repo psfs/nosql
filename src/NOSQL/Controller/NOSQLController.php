@@ -29,20 +29,27 @@ class NOSQLController extends NOSQLBaseController {
     /**
      * @GET
      * @route /admin/config/params
+     * @visible false
      */
     public function configParams() {
         $response = array_merge(Config::$required, Config::$optional);
         $domains = Router::getInstance()->getDomains();
-        foreach ($domains as $domain => $routes) {
-            $pDomain = str_replace('@', '', $domain);
-            $pDomain = str_replace('/', '', $pDomain);
-            $response[] = strtolower($pDomain) . '.api.secret';
-        }
         $response[] = 'nosql.host';
         $response[] = 'nosql.port';
         $response[] = 'nosql.user';
         $response[] = 'nosql.password';
         $response[] = 'nosql.database';
+        foreach ($domains as $domain => $routes) {
+            $pDomain = str_replace('@', '', $domain);
+            $pDomain = str_replace('/', '', $pDomain);
+            $lowerDomain = strtolower($pDomain);
+            $response[] = $lowerDomain . '.api.secret';
+            $response[] = $lowerDomain . '.nosql.host';
+            $response[] = $lowerDomain . '.nosql.port';
+            $response[] = $lowerDomain . '.nosql.user';
+            $response[] = $lowerDomain . '.nosql.password';
+            $response[] = $lowerDomain . '.nosql.database';
+        }
         return $this->json($response, 200);
     }
 

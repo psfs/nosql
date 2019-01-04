@@ -1,0 +1,22 @@
+<?php
+namespace {{ domain }}\Dto;
+
+use \PSFS\base\dto\Dto;
+
+final class {{ model }} extends Dto {
+{% for property in properties %}
+    /**
+     * @var {{ property.type }}
+{% if property.required %}
+     * @required
+{% endif %}
+{% if property.type == 'enum' %}
+     * @values {{  property.enum }}
+{% endif %}
+     * @label {{ property.description }}{% if property.type == 'enum' %} ({{ property.enum }}){% endif %}
+
+     */
+    public ${{ property.name }};
+
+{% endfor %}
+}
