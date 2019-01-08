@@ -5,6 +5,7 @@ use NOSQL\Dto\CollectionDto;
 use NOSQL\Dto\IndexDto;
 use NOSQL\Dto\PropertyDto;
 use NOSQL\Exceptions\NOSQLParserException;
+use PSFS\base\Cache;
 
 /**
  * Trait NOSQLParserTrait
@@ -65,10 +66,26 @@ trait NOSQLParserTrait {
 
     /**
      * @throws NOSQLParserException
+     * @throws \PSFS\base\exception\GeneratorException
      */
     protected function hydrate() {
         if(empty($this->domain)) {
             throw new NOSQLParserException(t('Domain not defined'), NOSQLParserException::NOSQL_PARSER_DOMAIN_NOT_DEFINED);
+        }
+        $schemaFilename = CORE_DIR . DIRECTORY_SEPARATOR . $this->domain . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
+        if(file_exists($schemaFilename)) {
+            $schema = Cache::getInstance()->getDataFromFile($schemaFilename, Cache::JSON, true);
+            $class = get_called_class();
+            $this->schema = new CollectionDto(false);
+            foreach($schema as $collection) {
+                $collectionName = $collection['name'];
+                if(false !== strpos($class, $collectionName)) {
+                    $this->schema->fromArray($collection);
+                    break;
+                }
+            }
+        } else {
+            throw  new NOSQLParserException(t('Schema file not exists'), NOSQLParserException::NOSQL_PARSER_SCHEMA_NOT_DEFINED);
         }
     }
 

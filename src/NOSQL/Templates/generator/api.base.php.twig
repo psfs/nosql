@@ -2,6 +2,7 @@
 namespace {{ domain }}\Api\base;
 
 use \NOSQL\Api\base\NOSQLBase;
+use \{{ domain }}\Models\{{ model }} as {{ model }}Model;
 
 /**
  * Class {{ model }}
@@ -9,6 +10,7 @@ use \NOSQL\Api\base\NOSQLBase;
  * Generated at [{{ ""|date("Y-m-d H:i:s") }}]
  */
 abstract class {{ model }} extends NOSQLBase {
+    const MODEL_CLASS = {{ model }}Model::class;
     /**
     * @label Get list of {__API__} documents filtered
     * @GET
@@ -29,9 +31,9 @@ abstract class {{ model }} extends NOSQLBase {
     * @CACHE 600
     * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
     *
-    * @param int $pk
+    * @param string $pk
     *
-    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     */
     public function get($pk)
     {
@@ -46,7 +48,7 @@ abstract class {{ model }} extends NOSQLBase {
     *
     * @param string $pk
     *
-    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     */
     public function delete($pk = NULL)
     {
@@ -57,10 +59,10 @@ abstract class {{ model }} extends NOSQLBase {
     * @label Create a new {__API__} document
     *
     * @POST
-    * @PAYLOAD \{{ domain }}\Dto\{{ model }}
+    * @PAYLOAD \{{ domain }}\Dto\Models\{{ model }}
     * @ROUTE /{__DOMAIN__}/api/{__API__}
     *
-    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     */
     public function post()
     {
@@ -71,12 +73,12 @@ abstract class {{ model }} extends NOSQLBase {
     * @label Modify {__API__} document
     *
     * @PUT
-    * @PAYLOAD \{{ domain }}\Dto\{{ model }}
+    * @PAYLOAD \{{ domain }}\Dto\Models\{{ model }}
     * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
     *
     * @param string $pk
     *
-    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\{{ model }})
+    * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     *
     */
     public function put($pk)
@@ -89,8 +91,8 @@ abstract class {{ model }} extends NOSQLBase {
     * @POST
     * @route /{__DOMAIN__}/api/{__API__}s
     *
-    * @payload [\{{ domain }}\Dto\{{ model }}]
-    * @return \PSFS\base\dto\JsonResponse(data=[\{{ domain }}\Dto\{{ model }}])
+    * @payload [\{{ domain }}\Dto\Models\{{ model }}]
+    * @return \PSFS\base\dto\JsonResponse(data=[\{{ domain }}\Dto\Models\{{ model }}])
     */
     public function bulk()
     {

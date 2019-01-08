@@ -118,7 +118,7 @@ class NOSQLService extends Service {
             '@NOSQL/generator/model.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Models',
             '@NOSQL/generator/api.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api',
             '@NOSQL/generator/api.base.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api' . DIRECTORY_SEPARATOR . 'base',
-            '@NOSQL/generator/dto.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Dto',
+            '@NOSQL/generator/dto.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Models',
         ];
         foreach($collections as $raw) {
             $collection = new CollectionDto(false);
@@ -153,7 +153,6 @@ class NOSQLService extends Service {
                 $this->cache->storeData($filename, $fileContent, Cache::TEXT, true);
                 $created = true;
             } catch (\Exception $e) {
-                pre($e->getMessage());
                 Logger::log($e->getMessage(), LOG_ERR);
             }
         } else {
@@ -164,6 +163,7 @@ class NOSQLService extends Service {
 
     /**
      * @param $module
+     * @return bool
      * @throws \PSFS\base\exception\GeneratorException
      */
     public function syncCollections($module) {

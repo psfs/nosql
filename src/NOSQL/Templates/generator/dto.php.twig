@@ -1,9 +1,9 @@
 <?php
-namespace {{ domain }}\Dto;
+namespace {{ domain }}\Dto\Models;
 
-use \PSFS\base\dto\Dto;
+use \NOSQL\Dto\Model\NOSQLModelDto;
 
-final class {{ model }} extends Dto {
+final class {{ model }} extends NOSQLModelDto {
 {% for property in properties %}
     /**
      * @var {{ property.type }}
@@ -13,7 +13,7 @@ final class {{ model }} extends Dto {
 {% if property.type == 'enum' %}
      * @values {{  property.enum }}
 {% endif %}
-     * @label {{ property.description }}{% if property.type == 'enum' %} ({{ property.enum }}){% endif %}
+     * @label {{ property.description|default(property.name) }}{% if property.type == 'enum' %} ({{ property.enum }}){% endif %}
 
      */
     public ${{ property.name }};
