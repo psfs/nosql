@@ -13,6 +13,7 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
         $scope.loading = false;
         $scope.hasMessage = false;
         $scope.message = '';
+        $scope.selectedCollection = null;
 
         function loadTypes() {
             $httpSrv.$get('/NOSQL/Api/__admin/types')
@@ -117,7 +118,8 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
             $scope.storeCollections(true);
         };
 
-        $scope.editCollection = (collection) => {
+        $scope.editCollection = (collection, index) => {
+            $scope.selectedCollection = index;
             let change = true;
             if($scope.collection) {
                 change = $scope.collection.id !== collection.id;

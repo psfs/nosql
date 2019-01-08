@@ -171,29 +171,7 @@ class NOSQLService extends Service {
         $collections = $this->getCollections($module);
         $success = true;
         foreach($collections as $raw) {
-            $jsonSchema = new JsonSchemaDto(false);
-            foreach($raw['properties'] as $rawProperty) {
-                switch($rawProperty['type']) {
-                    case NOSQLBase::NOSQL_TYPE_INTEGER:
-                    case NOSQLBase::NOSQL_TYPE_DOUBLE:
-                    case NOSQLBase::NOSQL_TYPE_LONG:
-                        $property = new NumberPropertyDto(false);
-                    break;
-                    case NOSQLBase::NOSQL_TYPE_ENUM:
-                        $property = new EnumPropertyDto(false);
-                        $property->enum = explode('|', $rawProperty['enum']);
-                    break;
-                    default:
-                        $property = new StringPropertyDto(false);
-                    break;
-                }
-                $property->bsonType = $rawProperty['type'];
-                $property->description = $rawProperty['description'];
-                if($rawProperty['required']) {
-                    $jsonSchema->required[] = $rawProperty['name'];
-                }
-                $jsonSchema->properties[$rawProperty['name']] = $property->toArray();
-            }
+            $jsonSchema = $this->parseCollection($raw);
             try {
                 /** @var BSONDocument $result */
                 $result = $db->createCollection($raw['name'], [
@@ -201,10 +179,8 @@ class NOSQLService extends Service {
                         '$jsonSchema' => $jsonSchema->toArray(),
                     ]
                 ]);
-                $stdClass = $result->bsonSerialize();
-                if(!property_exists($stdClass, 'ok') && $stdClass->ok < 1) {
-                    $success = false;
-                }
+                $response = $result->getArrayCopy();
+                $success = array_key_exists('ok', $response) && $response['ok'] > 0;
             } catch(\Exception $exception) {
                 if($exception->getCode() !== 48) {
                     $success = false;
@@ -212,5 +188,38 @@ class NOSQLService extends Service {
             }
         }
         return $success;
+    }
+
+    /**
+     * @param array $raw
+     * @return JsonSchemaDto
+     * @throws \PSFS\base\exception\GeneratorException
+     */
+    private function parseCollection($raw)
+    {
+        $jsonSchema = new JsonSchemaDto(false);
+        foreach ($raw['properties'] as $rawProperty) {
+            switch ($rawProperty['type']) {
+                case NOSQLBase::NOSQL_TYPE_INTEGER:
+                case NOSQLBase::NOSQL_TYPE_DOUBLE:
+                case NOSQLBase::NOSQL_TYPE_LONG:
+                    $property = new NumberPropertyDto(false);
+                    break;
+                case NOSQLBase::NOSQL_TYPE_ENUM:
+                    $property = new EnumPropertyDto(false);
+                    $property->enum = explode('|', $rawProperty['enum']);
+                    break;
+                default:
+                    $property = new StringPropertyDto(false);
+                    break;
+            }
+            $property->bsonType = $rawProperty['type'];
+            $property->description = $rawProperty['description'];
+            if ($rawProperty['required']) {
+                $jsonSchema->required[] = $rawProperty['name'];
+            }
+            $jsonSchema->properties[$rawProperty['name']] = $property->toArray();
+        }
+        return $jsonSchema;
     }
 }

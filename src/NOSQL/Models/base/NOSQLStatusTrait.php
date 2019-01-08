@@ -1,6 +1,10 @@
 <?php
 namespace NOSQL\Models\base;
 
+use MongoDB\Database;
+use NOSQL\Dto\Model\NOSQLModelDto;
+use NOSQL\Models\NOSQLActiveRecord;
+
 /**
  * Trait NOSQLStatusTrail
  * @package NOSQL\Models\base
@@ -74,6 +78,22 @@ trait NOSQLStatusTrait {
         if(!in_array($property, $this->changes)) {
             $this->changes[] = $property;
         }
+    }
+
+    /**
+     * @param NOSQLActiveRecord $model
+     * @param NOSQLModelDto $dto
+     * @param $hook
+     * @param Database|null $con
+     * @throws \NOSQL\Exceptions\NOSQLValidationException
+     */
+    public static function invokeHook(NOSQLActiveRecord $model, NOSQLModelDto $dto, $hook, Database $con = null) {
+        if(method_exists($model, $hook)) {
+            $con = self::initConnection($con, $model);
+            $model->feed($dto->toArray());
+            $model->$hook($con);
+        }
+        unset($model);
     }
 
 }

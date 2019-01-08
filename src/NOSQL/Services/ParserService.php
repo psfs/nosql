@@ -25,9 +25,15 @@ final class ParserService extends  Singleton {
         $dns .= Config::getParam('nosql.user', '', $lowerDomain);
         $dns .= ':' . Config::getParam('nosql.password', '', $lowerDomain);
         $dns .= '@' . Config::getParam('nosql.host', 'localhost', $lowerDomain);
-        $dns .= ':' . Config::getParam('nosql.port', '27017', $lowerDomain);
+
         $database = Config::getParam('nosql.database', 'nosql', $lowerDomain);
-        $dns .= '/' . $database;
+        if(null !== Config::getParam('nosql.replicaset')) {
+            $dns .= '/' . $database . '?ssl=true&replicaSet=' . Config::getParam('nosql.replicaset', null, $lowerDomain);
+            $dns .= '&authSource=admin&serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000&retryWrites=true';
+        } else {
+            $dns .= ':' . Config::getParam('nosql.port', '27017', $lowerDomain);
+            $dns .= '/' . $database;
+        }
         $client = new Client($dns);
         return $client->selectDatabase($database);
     }

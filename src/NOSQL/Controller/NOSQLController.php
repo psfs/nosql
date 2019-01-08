@@ -39,6 +39,7 @@ class NOSQLController extends NOSQLBaseController {
         $response[] = 'nosql.user';
         $response[] = 'nosql.password';
         $response[] = 'nosql.database';
+        $response[] = 'nosql.replicaset';
         foreach ($domains as $domain => $routes) {
             $pDomain = str_replace('@', '', $domain);
             $pDomain = str_replace('/', '', $pDomain);
@@ -49,6 +50,7 @@ class NOSQLController extends NOSQLBaseController {
             $response[] = $lowerDomain . '.nosql.user';
             $response[] = $lowerDomain . '.nosql.password';
             $response[] = $lowerDomain . '.nosql.database';
+            $response[] = $lowerDomain . '.nosql.replicaset';
         }
         return $this->json($response, 200);
     }

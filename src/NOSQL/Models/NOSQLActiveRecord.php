@@ -3,6 +3,7 @@ namespace NOSQL\Models;
 
 use MongoDB\BSON\ObjectId;
 use MongoDB\Database;
+use NOSQL\Dto\Model\NOSQLModelDto;
 use NOSQL\Models\base\NOSQLModelTrait;
 use NOSQL\Models\base\NOSQLParserTrait;
 use NOSQL\Services\ParserService;
@@ -33,6 +34,18 @@ abstract class NOSQLActiveRecord {
      */
     public function toArray() {
         return $this->dto->toArray();
+    }
+
+    /**
+     * @param bool $cleanPk
+     * @return \NOSQL\Dto\Model\NOSQLModelDto
+     */
+    public function getDtoCopy($cleanPk = false) {
+        $copy = clone $this->dto;
+        if($cleanPk) {
+            $this->dto->resetPk();
+        }
+        return $copy;
     }
 
     /**
@@ -96,8 +109,32 @@ abstract class NOSQLActiveRecord {
         return $updated;
     }
 
+    /**
+     * @param array $data
+     * @param Database|null $con
+     * @return int
+     */
+    public function bulkInsert(array $data, Database $con = null) {
+        $inserts = 0;
+        if(null === $con) {
+            $con = ParserService::getInstance()->createConnection($this->getDomain());
+        }
+        $collection = $con->selectCollection($this->getSchema()->name);
+        try {
+            $dtos = $this->prepareInsertDtos($data, $con);
+            $result = $collection->insertMany($data);
+            $ids = $result->getInsertedIds();
+            $inserts = $this->parseInsertedDtos($con, $ids, $dtos);
+        } catch(\Exception $exception) {
+            Logger::log($exception, LOG_CRIT, $this->toArray());
+        }
+        return $inserts;
+    }
 
-
+    /**
+     * @param Database|null $con
+     * @return bool
+     */
     public function delete(Database $con = null) {
         $deleted = false;
         if(null === $con) {
@@ -117,19 +154,45 @@ abstract class NOSQLActiveRecord {
     }
 
     /**
-     * @param string $pk
-     * @param Database|null $con
-     * @return NOSQLActiveRecord
+     * @param array $data
+     * @param Database $con
+     * @return array
+     * @throws \NOSQL\Exceptions\NOSQLValidationException
      */
-    public static function findPk($pk, Database $con = null) {
-        $modelName = get_called_class();
-        $model = new $modelName();
-        if(null === $con) {
-            $con = ParserService::getInstance()->createConnection($model->getDomain());
+    private function prepareInsertDtos(array $data, Database $con)
+    {
+        $dtos = [];
+        /** @var NOSQLModelDto $dto */
+        $now = new \DateTime();
+        foreach ($data as $insertData) {
+            $dto = $this->getDtoCopy(true);
+            $dto->fromArray($insertData);
+            $dto->setLastUpdate($now);
+            $dtos[] = $dto;
+            self::invokeHook($this, $dto, 'preInsert', $con);
+            self::invokeHook($this, $dto, 'preSave', $con);
         }
-        $collection = $con->selectCollection($model->getSchema()->name);
-        $result = $collection->findOne(['_id' => new ObjectId($pk)]);
-        $model->feed($result->getArrayCopy());
-        return $model;
+        unset($dto);
+        return $dtos;
+    }
+
+    /**
+     * @param Database $con
+     * @param ObjectId[] $ids
+     * @param NOSQLModelDto[] $dtos
+     * @return int
+     * @throws \NOSQL\Exceptions\NOSQLValidationException
+     */
+    private function parseInsertedDtos(Database $con, $ids, $dtos)
+    {
+        $inserts = 0;
+        foreach ($ids as $index => $insertedId) {
+            $id = $insertedId->jsonSerialize();
+            $dtos[$index]->setPk($id['$oid']);
+            self::invokeHook($this, $dtos[$index], 'postInsert', $con);
+            self::invokeHook($this, $dtos[$index], 'postSave', $con);
+            $inserts++;
+        }
+        return $inserts;
     }
 }

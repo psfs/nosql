@@ -14,6 +14,6 @@
     <div class="list-group-item text-center" ng-show="loading">
         <i class="fa fa-cog fa-spin"></i>&nbsp;{{ "Cargando..."|trans }}
     </div>
-    <a class="list-group-item" ng-click="editCollection(table)" ng-repeat="table in collections"
+    <a class="list-group-item" ng-click="editCollection(table, $index)" ng-repeat="table in collections"
        ng-bind="table.name" ng-class="{'active':table.id === collection.id}"></a>
 </div>

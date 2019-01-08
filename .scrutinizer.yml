@@ -1,0 +1,27 @@
+checks:
+  php: true
+
+build:
+  environment:
+    php: "7.2"
+  tests:
+    override:
+      - php-scrutinizer-run
+      -
+        command: 'vendor/bin/phpunit --coverage-clover=psfs-coverage'
+        coverage:
+          file: 'psfs-coverage'
+          format: 'clover'
+
+filter:
+  excluded_paths:
+    - src/bin/*
+    - src/command/*
+    - src/test/*
+    - src/public/*
+    - src/templates/*
+    - locale/*
+    - cache/*
+    - config/*
+    - logs/*
+    - vendor/*

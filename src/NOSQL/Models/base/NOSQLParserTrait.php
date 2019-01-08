@@ -1,10 +1,13 @@
 <?php
 namespace NOSQL\Models\base;
 
+use MongoDB\Database;
 use NOSQL\Dto\CollectionDto;
 use NOSQL\Dto\IndexDto;
 use NOSQL\Dto\PropertyDto;
 use NOSQL\Exceptions\NOSQLParserException;
+use NOSQL\Models\NOSQLActiveRecord;
+use NOSQL\Services\ParserService;
 use PSFS\base\Cache;
 
 /**
@@ -87,6 +90,19 @@ trait NOSQLParserTrait {
         } else {
             throw  new NOSQLParserException(t('Schema file not exists'), NOSQLParserException::NOSQL_PARSER_SCHEMA_NOT_DEFINED);
         }
+    }
+
+    /**
+     * @param Database $con
+     * @param NOSQLActiveRecord $model
+     * @return Database
+     */
+    public static function initConnection(Database $con = null, NOSQLActiveRecord $model)
+    {
+        if (null === $con) {
+            $con = ParserService::getInstance()->createConnection($model->getDomain());
+        }
+        return $con;
     }
 
 }

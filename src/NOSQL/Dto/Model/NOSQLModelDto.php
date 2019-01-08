@@ -25,6 +25,11 @@ abstract class NOSQLModelDto extends Dto {
         return $this->_id;
     }
 
+    public function resetPk() {
+        $this->_id = null;
+        $this->_last_update = null;
+    }
+
     /**
      * @param string $id
      * @throws NOSQLValidationException
@@ -68,9 +73,8 @@ abstract class NOSQLModelDto extends Dto {
      */
     public function validate($throwException = false) {
         $errors = [];
-        $reflection = new \ReflectionClass(self::class);
+        $reflection = new \ReflectionClass(get_called_class());
         foreach($reflection->getProperties() as $property) {
-            $type = InjectorHelper::extractVarType($property->getDocComment());
             $required = InjectorHelper::checkIsRequired($property->getDocComment());
             $value = $property->getValue($this);
             if($required && empty($value)) {
@@ -80,34 +84,7 @@ abstract class NOSQLModelDto extends Dto {
                     $errors[] = $property->getName();
                 }
             } else {
-                switch(strtolower($type)) {
-                    case NOSQLBase::NOSQL_TYPE_LONG:
-                    case NOSQLBase::NOSQL_TYPE_INTEGER:
-                    case NOSQLBase::NOSQL_TYPE_DOUBLE:
-                        if(!is_numeric($value)) {
-                            $errors[] = $property->getName();
-                        }
-                    break;
-                    case NOSQLBase::NOSQL_TYPE_ENUM:
-                        $values = explode('|', InjectorHelper::getValues($property->getDocComment()));
-                        if(!in_array($value, $values)) {
-                            $errors[] = $property->getName();
-                        }
-                    break;
-                    case NOSQLBase::NOSQL_TYPE_ARRAY:
-                        if(!is_array($value)) {
-                            $errors[] = $property->getName();
-                        }
-                    break;
-                    case NOSQLBase::NOSQL_TYPE_BOOLEAN:
-                        if(!in_array($value, [true, false, 0, 1])) {
-                            $errors[] = $property->getName();
-                        }
-                    break;
-                }
-                if(in_array($property->getName(), $errors) && $throwException) {
-                    throw new NOSQLValidationException(t('Format not valid for property ') . $property->getName(), NOSQLValidationException::NOSQL_VALIDATION_NOT_VALID);
-                }
+                $this->checkType($throwException, $property, $value, $errors);
             }
         }
         return $errors;
@@ -121,5 +98,45 @@ abstract class NOSQLModelDto extends Dto {
         }
         $array['_last_update'] = $this->getLastUpdate(\DateTime::ATOM);
         return $array;
+    }
+
+    /**
+     * @param $throwException
+     * @param \ReflectionProperty $property
+     * @param $value
+     * @param array $errors
+     * @throws NOSQLValidationException
+     */
+    private function checkType($throwException, \ReflectionProperty $property, $value, array &$errors)
+    {
+        $type = InjectorHelper::extractVarType($property->getDocComment());
+        switch (strtolower($type)) {
+            case NOSQLBase::NOSQL_TYPE_LONG:
+            case NOSQLBase::NOSQL_TYPE_INTEGER:
+            case NOSQLBase::NOSQL_TYPE_DOUBLE:
+                if (!is_numeric($value)) {
+                    $errors[] = $property->getName();
+                }
+                break;
+            case NOSQLBase::NOSQL_TYPE_ENUM:
+                $values = explode('|', InjectorHelper::getValues($property->getDocComment()));
+                if (!in_array($value, $values)) {
+                    $errors[] = $property->getName();
+                }
+                break;
+            case NOSQLBase::NOSQL_TYPE_ARRAY:
+                if (!is_array($value)) {
+                    $errors[] = $property->getName();
+                }
+                break;
+            case NOSQLBase::NOSQL_TYPE_BOOLEAN:
+                if (!in_array($value, [true, false, 0, 1])) {
+                    $errors[] = $property->getName();
+                }
+                break;
+        }
+        if (in_array($property->getName(), $errors) && $throwException) {
+            throw new NOSQLValidationException(t('Format not valid for property ') . $property->getName(), NOSQLValidationException::NOSQL_VALIDATION_NOT_VALID);
+        }
     }
 }
