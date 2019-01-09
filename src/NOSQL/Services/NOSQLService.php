@@ -213,8 +213,12 @@ class NOSQLService extends Service {
                     $property = new StringPropertyDto(false);
                     break;
             }
-            $property->bsonType = $rawProperty['type'];
-            $property->description = $rawProperty['description'];
+            if(array_key_exists('type', $rawProperty)) {
+                $property->bsonType = $rawProperty['type'];
+            }
+            if(array_key_exists('description', $rawProperty)) {
+                $property->description = $rawProperty['description'];
+            }
             if ($rawProperty['required']) {
                 $jsonSchema->required[] = $rawProperty['name'];
             }
