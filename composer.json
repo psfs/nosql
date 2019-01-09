@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "psfs/core": "^1.0@dev",
-        "ext-mongodb": "^1.5",
+        "ext-mongodb": "^1.4",
         "mongodb/mongodb": "^1.4@dev"
     },
     "license": "MIT",
