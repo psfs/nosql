@@ -219,7 +219,7 @@ class NOSQLService extends Service {
             if(array_key_exists('description', $rawProperty)) {
                 $property->description = $rawProperty['description'];
             }
-            if ($rawProperty['required']) {
+            if (array_key_exists('required', $rawProperty) && $rawProperty['required']) {
                 $jsonSchema->required[] = $rawProperty['name'];
             }
             $jsonSchema->properties[$rawProperty['name']] = $property->toArray();
