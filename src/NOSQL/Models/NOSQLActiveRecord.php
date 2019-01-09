@@ -80,7 +80,7 @@ abstract class NOSQLActiveRecord {
                 $saved = true;
             }
         } catch(\Exception $exception) {
-            Logger::log($exception, LOG_CRIT, $this->toArray());
+            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $saved;
     }
@@ -104,7 +104,7 @@ abstract class NOSQLActiveRecord {
             $this->postUpdate($con);
             $updated = true;
         } catch(\Exception $exception) {
-            Logger::log($exception, LOG_CRIT, $this->toArray());
+            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $updated;
     }
@@ -126,7 +126,7 @@ abstract class NOSQLActiveRecord {
             $ids = $result->getInsertedIds();
             $inserts = $this->parseInsertedDtos($con, $ids, $dtos);
         } catch(\Exception $exception) {
-            Logger::log($exception, LOG_CRIT, $this->toArray());
+            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $inserts;
     }
@@ -148,7 +148,7 @@ abstract class NOSQLActiveRecord {
             $deleted = true;
             $this->dto = null;
         } catch(\Exception $exception) {
-            Logger::log($exception, LOG_CRIT, $this->toArray());
+            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $deleted;
     }
