@@ -13,6 +13,4 @@ install:
 after_deploy:
   - phpunit
 
-before_install:
-  - pecl channel-update pecl.php.net
-  - echo '' | pecl install -f mongo
+before_install: echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
