@@ -30,22 +30,24 @@ final class NOSQLQuery {
     }
 
     /**
-     * @param $modelName
+     * @param string $modelName
      * @param array $criteria
      * @param Database|null $con
      * @return ResultsetDto
+     * @throws \NOSQL\Exceptions\NOSQLValidationException
      * @throws \PSFS\base\exception\GeneratorException
      */
     public static function find($modelName, array $criteria, Database $con = null) {
+        /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
         $con = NOSQLParserTrait::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name);
         $resultSet = new ResultsetDto(false);
-        $filters = [];
         $resultSet->count = $collection->countDocuments($filters);
         $nosqlOptions = [
             'limit' => (integer)(array_key_exists(Api::API_LIMIT_FIELD, $criteria) ? $criteria[Api::API_LIMIT_FIELD] : Config::getParam('pagination.limit', 50)),
         ];
+        $filters = self::parseCriteria($criteria, $model);
         $results = $collection->find($filters, $nosqlOptions);
         /** @var  $result */
         $items = $results->toArray();
@@ -54,5 +56,24 @@ final class NOSQLQuery {
             $resultSet->items[] = $model->getDtoCopy(true);
         }
         return $resultSet;
+    }
+
+    /**
+     * @param array $criteria
+     * @param NOSQLActiveRecord $model
+     * @return array
+     */
+    private static function parseCriteria(array $criteria, NOSQLActiveRecord $model)
+    {
+        $filters = [];
+        foreach ($model->getSchema()->properties as $property) {
+            if (array_key_exists($property->name, $criteria)) {
+                $filters[$property->name] = [
+                    '$regex' => $criteria[$property->name],
+                    '$options' => 'i',
+                ];
+            }
+        }
+        return $filters;
     }
 }

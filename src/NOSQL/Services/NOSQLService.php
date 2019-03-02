@@ -1,6 +1,7 @@
 <?php
 namespace NOSQL\Services;
 
+use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use NOSQL\Dto\CollectionDto;
 use NOSQL\Dto\Validation\EnumPropertyDto;
@@ -163,6 +164,19 @@ class NOSQLService extends Service {
     }
 
     /**
+     * @param Database $db
+     * @param $collection
+     */
+    private function createIndexes(Database $db, $collection) {
+        try {
+            $collection = $db->selectCollection($collection['name']);
+            $collection->createIndex(['$**' => 'text'], ['name' => 'idx_text']);
+        } catch (\Exception $exception) {
+            Logger::log($exception->getMessage(), LOG_DEBUG);
+        }
+    }
+
+    /**
      * @param $module
      * @return bool
      * @throws \PSFS\base\exception\GeneratorException
@@ -187,6 +201,7 @@ class NOSQLService extends Service {
                     $success = false;
                 }
             }
+            $this->createIndexes($db, $raw);
         }
         return $success;
     }
