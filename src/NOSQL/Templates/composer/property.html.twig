@@ -26,7 +26,14 @@
             <label for="enum_{{ '{{ model.id }}' }}" class="control-label">{{ 'Valores (separados por | )'|trans }}</label>
             <input type="text" id="enum_{{ '{{ model.id }}' }}" ng-model="model.enum" required class="form-control">
         </div>
-        <div class="form-group col-xs-12" ng-show="show">
+        <div class="form-group col-xs-4" ng-show="show">
+            <label for="validation_{{ '{{ model.id }}' }}" class="control-label">{{ 'Tipo de validación'|trans }}</label>
+            <select name="validation" id="validation_{{ '{{ model.id }}' }}" class="form-control" required ng-model="model.validation">
+                <option ng-repeat="validation in validations" ng-value="validation" ng-bind="validation"></option>
+            </select>
+        </div>
+        <div class="form-group col-xs-8" ng-show="show">
+            <label for="description_{{ '{{ model.id }}' }}" class="control-label">{{ 'Descripción'|trans }}</label>
             <input type="text" id="description_{{ '{{ model.id }}' }}" ng-model="model.description" required class="form-control" placeholder="{{ 'Descripción'|trans }}">
         </div>
     </div>

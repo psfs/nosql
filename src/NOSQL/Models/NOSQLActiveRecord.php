@@ -4,6 +4,7 @@ namespace NOSQL\Models;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Database;
 use NOSQL\Dto\Model\NOSQLModelDto;
+use NOSQL\Exceptions\NOSQLValidationException;
 use NOSQL\Models\base\NOSQLModelTrait;
 use NOSQL\Models\base\NOSQLParserTrait;
 use NOSQL\Services\ParserService;
@@ -48,6 +49,10 @@ abstract class NOSQLActiveRecord {
         return $copy;
     }
 
+    private function prepareData() {
+        $this->dto->validate(true);
+    }
+
     /**
      * @param Database|null $con
      * @return bool
@@ -60,7 +65,8 @@ abstract class NOSQLActiveRecord {
         $collection = $con->selectCollection($this->getSchema()->name);
         try {
             $isInsert = $isUpdate = false;
-            $this->dto->setLastUpdate(new \DateTime());
+            $this->prepareData();
+            $this->dto->setLastUpdate();
             if($this->isNew()) {
                 $this->preInsert($con);
                 $isInsert = true;
@@ -78,9 +84,14 @@ abstract class NOSQLActiveRecord {
                     $this->postUpdate($con);
                 }
                 $saved = true;
+                $this->countAction();
             }
         } catch(\Exception $exception) {
-            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
+            if($exception instanceof NOSQLValidationException) {
+                throw $exception;
+            } else {
+                Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
+            }
         }
         return $saved;
     }
@@ -96,15 +107,21 @@ abstract class NOSQLActiveRecord {
         }
         $collection = $con->selectCollection($this->getSchema()->name);
         try {
-            $this->dto->setLastUpdate(new \DateTime());
+            $this->prepareData();
+            $this->dto->setLastUpdate();
             $this->preUpdate($con);
             $data = $this->toArray();
             unset($data['_id']);
             $collection->findOneAndReplace(['_id' => new ObjectId($this->dto->getPk())], $data);
             $this->postUpdate($con);
             $updated = true;
+            $this->countAction();
         } catch(\Exception $exception) {
-            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
+            if($exception instanceof NOSQLValidationException) {
+                throw $exception;
+            } else {
+                Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
+            }
         }
         return $updated;
     }
@@ -125,6 +142,7 @@ abstract class NOSQLActiveRecord {
             $result = $collection->insertMany($data);
             $ids = $result->getInsertedIds();
             $inserts = $this->parseInsertedDtos($con, $ids, $dtos);
+            $this->setActionCount($inserts);
         } catch(\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
@@ -147,6 +165,7 @@ abstract class NOSQLActiveRecord {
             $this->postDelete($con);
             $deleted = true;
             $this->dto = null;
+            $this->countAction();
         } catch(\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
@@ -163,11 +182,10 @@ abstract class NOSQLActiveRecord {
     {
         $dtos = [];
         /** @var NOSQLModelDto $dto */
-        $now = new \DateTime();
         foreach ($data as $insertData) {
             $dto = $this->getDtoCopy(true);
             $dto->fromArray($insertData);
-            $dto->setLastUpdate($now);
+            $dto->setLastUpdate();
             $dtos[] = $dto;
             self::invokeHook($this, $dto, 'preInsert', $con);
             self::invokeHook($this, $dto, 'preSave', $con);

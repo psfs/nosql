@@ -3,6 +3,7 @@
 app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
     ($scope, $httpSrv, $msgSrv, $timeout) => {
         $scope.types = [];
+        $scope.validations = [];
         $scope.domains = [];
         $scope.domain = null;
         $scope.collections = [];
@@ -22,6 +23,15 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
                         $scope.types = response.data.data;
                     }
                 }).finally(() => $msgSrv.send('nosql.types.loaded'));
+        }
+
+        function loadValidations() {
+            $httpSrv.$get('/NOSQL/Api/__admin/validations')
+                .then((response) => {
+                    if(response.data.success) {
+                        $scope.validations = response.data.data;
+                    }
+                }).finally(() => $msgSrv.send('nosql.validations.loaded'));
         }
 
         function loadDomains() {
@@ -180,6 +190,7 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
         // Initialization
         function init() {
             loadTypes();
+            loadValidations();
             loadDomains();
             loadUI();
         }

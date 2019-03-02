@@ -4,6 +4,7 @@ namespace NOSQL\Api\base;
 use NOSQL\Dto\Model\ResultsetDto;
 use NOSQL\Models\NOSQLActiveRecord;
 use NOSQL\Models\NOSQLQuery;
+use NOSQL\Services\Base\NOSQLManagetTrait;
 use PSFS\base\dto\JsonResponse;
 use PSFS\base\Logger;
 use PSFS\base\types\CustomApi;
@@ -15,6 +16,9 @@ use PSFS\base\types\CustomApi;
  * @property NOSQLActiveRecord $model
  */
 abstract class NOSQLBase extends CustomApi {
+    use NOSQLManagetTrait;
+
+    const NOSQL_MODEL_PRIMARY_KEY = '_id';
     /**
      * @Injectable
      * @var \NOSQL\Services\ParserService
@@ -30,9 +34,13 @@ abstract class NOSQLBase extends CustomApi {
         return null;
     }
 
+    /**
+     * @param int $status
+     */
     public function closeTransaction($status) { }
 
     /**
+     * @throws \NOSQL\Exceptions\NOSQLValidationException
      * @throws \ReflectionException
      */
     public function init()
@@ -43,14 +51,21 @@ abstract class NOSQLBase extends CustomApi {
     }
 
     /**
-     * @label {__API__} Manager
-     * @GET
-     * @route /admin/{__DOMAIN__}/{__API__}
-     * @return string HTML
+     * @return string
      */
-    public function admin() {
-        // TODO create nosql manager
-        $this->getRequest()->redirect($this->getRoute('admin-nosql', true));
+    public function getApi()
+    {
+        $class = explode('\\', get_called_class());
+        return $class[count($class)-1];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDomain()
+    {
+        $class = explode('\\', get_called_class());
+        return $class[0];
     }
 
     public function modelList()
@@ -87,19 +102,23 @@ abstract class NOSQLBase extends CustomApi {
 
     public function post()
     {
-        $success = true;
-        $code = 200;
+        $success = false;
+        $code = $message = null;
         try {
             $success = $this->getModel()->save($this->con);
         } catch (\Exception $exception) {
-            Logger::log($exception->getMessage(), LOG_WARNING, $this->getModel()->toArray());
+            $success = false;
+            $message = $exception->getMessage();
+            Logger::log($message, LOG_WARNING, $this->getModel()->toArray());
+        } finally {
+            $code = $success && null === $code ? 200 : 400;
         }
-        return $this->json(new JsonResponse($this->getModel()->toArray(), $success), $code);
+        return $this->json(new JsonResponse($this->getModel()->toArray(), $success, null, null, $message), $code);
     }
 
     public function put($pk)
     {
-        $code = 200;
+        $code = $message = null;
         try {
             $this->feedModel($pk);
             $this->getModel()->feed($this->getRequest()->getData());
@@ -107,10 +126,12 @@ abstract class NOSQLBase extends CustomApi {
         } catch (\Exception $exception) {
             $this->model = null;
             $success = false;
-            $code = 404;
-            Logger::log($exception->getMessage(), LOG_WARNING, [$pk]);
+            $message = $exception->getMessage();
+            Logger::log($message, LOG_WARNING, [$pk]);
+        } finally {
+            $code = $success && null === $code ? 200 : 400;
         }
-        return $this->json(new JsonResponse(null !== $this->model ? $this->getModel()->toArray() : [], $success), $code);
+        return $this->json(new JsonResponse(null !== $this->model ? $this->getModel()->toArray() : [], $success, null, null, $message), $code);
     }
 
     public function delete($pk = null)
@@ -150,7 +171,7 @@ abstract class NOSQLBase extends CustomApi {
      * @param $pk
      * @throws \PSFS\base\exception\ApiException
      */
-    private function feedModel($pk): void
+    private function feedModel($pk)
     {
         $className = get_called_class();
         $modelName = $className::MODEL_CLASS;

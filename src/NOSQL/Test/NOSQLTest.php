@@ -1,6 +1,5 @@
 <?php
 namespace NOSQL\Test;
-
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,7 +11,31 @@ use PHPUnit\Framework\TestCase;
 */
 class NOSQLTest extends TestCase {
 
-    public function testNOSQLBase() {
-        $this->assertTrue(true);
+    public function testConnection() {
+        // TODO
+    }
+
+    public function testGenerate() {
+        // TODO
+    }
+
+    public function testInsert() {
+        // TODO
+    }
+
+    public function testUpdate() {
+        // TODO
+    }
+
+    public function testDelete() {
+        // TODO
+    }
+
+    public function testBulkInsert() {
+        // TODO
+    }
+
+    public function testForms() {
+        // TODO
     }
 }

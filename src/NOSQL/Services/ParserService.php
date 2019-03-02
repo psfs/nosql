@@ -59,6 +59,7 @@ final class ParserService extends  Singleton {
      * @param array $data
      * @param $className
      * @return NOSQLModelTrait|null
+     * @throws \NOSQL\Exceptions\NOSQLValidationException
      * @throws \ReflectionException
      */
     public function hydrateModelFromRequest(array $data, $className) {

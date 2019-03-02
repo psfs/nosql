@@ -1,7 +1,6 @@
 <?php
 namespace NOSQL\Api;
 
-use NOSQL\Dto\CollectionDto;
 use PSFS\base\dto\JsonResponse;
 use PSFS\base\Logger;
 use PSFS\base\types\CustomApi;
@@ -25,6 +24,15 @@ class NOSQL extends CustomApi {
      */
     public function getNOSQLTypes() {
         return $this->json(new JsonResponse($this->srv->getTypes(), true), 200);
+    }
+
+    /**
+     * @GET
+     * @route /{__DOMAIN__}/APi/{__API__}/validations
+     * @return \PSFS\base\dto\JsonResponse(data=array)
+     */
+    public function getFormValidations() {
+        return $this->json(new JsonResponse($this->srv->getValidations(), true), 200);
     }
 
     /**

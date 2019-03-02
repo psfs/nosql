@@ -11,6 +11,10 @@ use NOSQL\Models\NOSQLActiveRecord;
  */
 trait NOSQLStatusTrait {
     /**
+     * @var int
+     */
+    protected $actionCount = 0;
+    /**
      * @var bool
      */
     protected $isNew = true;
@@ -79,6 +83,25 @@ trait NOSQLStatusTrait {
             $this->changes[] = $property;
         }
     }
+    /**
+     * @return int
+     */
+    protected function getActionCount()
+    {
+        return $this->actionCount;
+    }
+
+    /**
+     * @param int $actionCount
+     */
+    protected function setActionCount($actionCount)
+    {
+        $this->actionCount = $actionCount;
+    }
+
+    protected function countAction() {
+        $this->actionCount++;
+    }
 
     /**
      * @param NOSQLActiveRecord $model
@@ -89,7 +112,7 @@ trait NOSQLStatusTrait {
      */
     public static function invokeHook(NOSQLActiveRecord $model, NOSQLModelDto $dto, $hook, Database $con = null) {
         if(method_exists($model, $hook)) {
-            $con = self::initConnection($con, $model);
+            $con = self::initConnection($model, $con);
             $model->feed($dto->toArray());
             $model->$hook($con);
         }

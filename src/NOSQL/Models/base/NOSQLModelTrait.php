@@ -2,6 +2,7 @@
 namespace NOSQL\Models\base;
 
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Database;
 use NOSQL\Dto\Model\NOSQLModelDto;
 
@@ -57,17 +58,32 @@ trait NOSQLModelTrait {
 
     /**
      * @param array $data
+     * @param bool $withName
      * @throws \NOSQL\Exceptions\NOSQLValidationException
      */
-    public function feed(array $data) {
+    public function feed(array $data, $withName = false) {
+        $name = '';
+        $sep = '';
         foreach($data as $key => $value) {
             if($value instanceof ObjectId) {
                 $this->dto->setPk($value->jsonSerialize()['$oid']);
             } elseif($key === '_last_update') {
-                $this->dto->setLastUpdate(\DateTime::createFromFormat(\DateTime::ATOM, $value));
+                $this->dto->setLastUpdate($value instanceof UTCDateTime ? $value : null);
             } else {
+                switch(get_class($value)) {
+                    case UTCDateTime::class:
+                        $value = $value->toDateTime()->format('Y-m-d H:i:s');
+                        break;
+                }
                 $this->$key = $value;
+                if(in_array(strtolower($key), ['name', 'label', 'title', 'method'])) {
+                    $name .= $sep . $value;
+                    $sep = ' ';
+                }
             }
+        }
+        if($withName) {
+            $this->dto->setName($name);
         }
     }
 

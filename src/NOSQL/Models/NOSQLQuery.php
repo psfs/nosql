@@ -18,7 +18,7 @@ final class NOSQLQuery {
      */
     public static function findPk($modelName, $pk, Database $con = null) {
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($con, $model);
+        $con = NOSQLParserTrait::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name);
         $result = $collection->findOne(['_id' => new ObjectId($pk)]);
         if(null !== $result) {
@@ -38,17 +38,19 @@ final class NOSQLQuery {
      */
     public static function find($modelName, array $criteria, Database $con = null) {
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($con, $model);
+        $con = NOSQLParserTrait::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name);
-        $nosqlOptions = [
-            'limit' => array_key_exists(Api::API_LIMIT_FIELD, $criteria) ? $criteria[Api::API_LIMIT_FIELD] : Config::getParam('pagination.limit', 50),
-        ];
         $resultSet = new ResultsetDto(false);
-        $resultSet->count = $collection->countDocuments($criteria, $nosqlOptions);
-        $results = $collection->find($criteria, $nosqlOptions);
+        $filters = [];
+        $resultSet->count = $collection->countDocuments($filters);
+        $nosqlOptions = [
+            'limit' => (integer)(array_key_exists(Api::API_LIMIT_FIELD, $criteria) ? $criteria[Api::API_LIMIT_FIELD] : Config::getParam('pagination.limit', 50)),
+        ];
+        $results = $collection->find($filters, $nosqlOptions);
         /** @var  $result */
-        foreach($results->toArray() as $result) {
-            $model->feed($result->getArrayCopy());
+        $items = $results->toArray();
+        foreach($items as $item) {
+            $model->feed($item->getArrayCopy(), true);
             $resultSet->items[] = $model->getDtoCopy(true);
         }
         return $resultSet;

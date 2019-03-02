@@ -1,5 +1,5 @@
 <?php
-namespace NOSQL\Services\base;
+namespace NOSQL\Services\Base;
 
 /**
  * Class NOSQLBase
@@ -21,4 +21,5 @@ final class NOSQLBase {
     const NOSQL_TYPE_TIMESTAMP = 'timestamp';
     const NOSQL_TYPE_LONG = 'long';
     const NOSQL_TYPE_ENUM = 'enum';
+
 }

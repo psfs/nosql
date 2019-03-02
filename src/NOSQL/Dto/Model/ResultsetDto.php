@@ -12,7 +12,7 @@ class ResultsetDto extends Dto {
      * @var NOSQLModelDto[]
      * @label Array of items
      */
-    public $items;
+    public $items = [];
     /**
      * @var int
      */

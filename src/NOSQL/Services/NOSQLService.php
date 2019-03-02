@@ -7,8 +7,9 @@ use NOSQL\Dto\Validation\EnumPropertyDto;
 use NOSQL\Dto\Validation\JsonSchemaDto;
 use NOSQL\Dto\Validation\NumberPropertyDto;
 use NOSQL\Dto\Validation\StringPropertyDto;
-use NOSQL\Services\base\NOSQLBase;
+use NOSQL\Services\Base\NOSQLBase;
 use PSFS\base\Cache;
+use PSFS\base\dto\Field;
 use PSFS\base\Logger;
 use PSFS\base\Service;
 use PSFS\base\Template;
@@ -114,10 +115,10 @@ class NOSQLService extends Service {
         $tpl = Template::getInstance();
         $tpl->addPath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Templates', 'NOSQL');
         $files = [
-            '@NOSQL/generator/model.base.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'base',
+            '@NOSQL/generator/model.base.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Base',
             '@NOSQL/generator/model.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Models',
             '@NOSQL/generator/api.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api',
-            '@NOSQL/generator/api.base.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api' . DIRECTORY_SEPARATOR . 'base',
+            '@NOSQL/generator/api.base.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Api' . DIRECTORY_SEPARATOR . 'Base',
             '@NOSQL/generator/dto.php.twig' => CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Models',
         ];
         foreach($collections as $raw) {
@@ -131,7 +132,7 @@ class NOSQLService extends Service {
                     'properties' => $collection->properties,
                 ]);
                 $force = false;
-                if(false !== strpos($template, 'dto') || false !== strpos($template, 'base')) {
+                if(false !== strpos($template, 'dto') || false !== strpos(strtolower($template), 'base')) {
                     $force = true;
                 }
                 $this->writeTemplateToFile($templateDump, $path . DIRECTORY_SEPARATOR . $collection->name . '.php', $force);
@@ -225,5 +226,18 @@ class NOSQLService extends Service {
             $jsonSchema->properties[$rawProperty['name']] = $property->toArray();
         }
         return $jsonSchema;
+    }
+
+    /**
+     * @return array
+     * @throws \ReflectionException
+     */
+    public function getValidations() {
+        $fieldTypes = new \ReflectionClass(Field::class);
+        $validations = [];
+        foreach($fieldTypes->getConstants() as $validation) {
+            $validations[] = $validation;
+        }
+        return $validations;
     }
 }
