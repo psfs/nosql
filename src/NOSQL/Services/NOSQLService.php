@@ -167,10 +167,18 @@ class NOSQLService extends Service {
      * @param Database $db
      * @param $collection
      */
-    private function createIndexes(Database $db, $collection) {
+    private function createIndexes(Database $db, $collectionDto) {
         try {
-            $collection = $db->selectCollection($collection['name']);
-            $collection->createIndex(['$**' => 'text'], ['name' => 'idx_text']);
+            $collection = $db->selectCollection($collectionDto['name']);
+            $textIndexes = [];
+            foreach($collectionDto['properties'] as $property) {
+                if(in_array($property['type'], [NOSQLBase::NOSQL_TYPE_STRING, NOSQLBase::NOSQL_TYPE_OBJECT])) {
+                    $textIndexes[$property['name']] = 'text';
+                }
+            }
+            if(count($textIndexes)) {
+                $collection->createIndex($textIndexes, ['name' => 'idx_text_' . $collectionDto['name']]);
+            }
         } catch (\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_DEBUG);
         }
