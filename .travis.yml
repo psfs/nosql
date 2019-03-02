@@ -14,4 +14,5 @@ after_deploy:
   - phpunit
 
 before_install:
-  - pecl install mongo
+  - pecl channel-update pecl.php.net
+  - pecl install -f mongo
