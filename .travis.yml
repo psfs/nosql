@@ -13,5 +13,5 @@ install:
 after_deploy:
   - phpunit
 
-before_install:
-  - phpenv config-add nosql.ini
+before_script:
+  - pecl install mongo
