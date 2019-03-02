@@ -15,4 +15,4 @@ after_deploy:
 
 before_install:
   - pecl channel-update pecl.php.net
-  - pecl install -f mongo
+  - echo '' | pecl install -f mongo
