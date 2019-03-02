@@ -13,5 +13,5 @@ install:
 after_deploy:
   - phpunit
 
-before_script:
+before_install:
   - pecl install mongo
