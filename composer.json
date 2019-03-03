@@ -3,7 +3,7 @@
     "description": "NOSQL package for PSFS",
     "type": "library",
     "require": {
-        "psfs/core": "^1.0@dev",
+        "psfs/core": "dev-master",
         "ext-mongodb": "^1.5",
         "mongodb/mongodb": "^1.4@dev"
     },

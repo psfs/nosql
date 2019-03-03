@@ -10,7 +10,7 @@
     </div>
 {% endblock body_header %}
 {% block body_content %}
-    <div class='container-fluid' ng-controller="NOSQLCtrl" ng-cloak>
+    <div id="nosql-admin" class='container-fluid' ng-controller="NOSQLCtrl" ng-cloak>
         <div class="row" ng-show="hasMessage">
             <p class="alert alert-success" ng-bind="message"></p>
         </div>

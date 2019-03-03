@@ -106,6 +106,10 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
             });
         };
 
+        $scope.addNewIndex = () => {
+
+        };
+
         $scope.createCollection = () => {
             let _ts = (new Date()).getTime();
             $scope.collections.push({
