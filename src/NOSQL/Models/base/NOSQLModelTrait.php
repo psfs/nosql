@@ -70,10 +70,12 @@ trait NOSQLModelTrait {
             } elseif($key === '_last_update') {
                 $this->dto->setLastUpdate($value instanceof UTCDateTime ? $value : null);
             } else {
-                switch(get_class($value)) {
-                    case UTCDateTime::class:
-                        $value = $value->toDateTime()->format('Y-m-d H:i:s');
-                        break;
+                if (is_object($value)) {
+                    switch (get_class($value)) {
+                        case UTCDateTime::class:
+                            $value = $value->toDateTime()->format('Y-m-d H:i:s');
+                            break;
+                    }
                 }
                 $this->$key = $value;
                 if(in_array(strtolower($key), ['name', 'label', 'title', 'method'])) {
