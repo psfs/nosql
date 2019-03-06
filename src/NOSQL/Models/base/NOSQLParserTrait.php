@@ -9,6 +9,7 @@ use NOSQL\Exceptions\NOSQLParserException;
 use NOSQL\Models\NOSQLActiveRecord;
 use NOSQL\Services\ParserService;
 use PSFS\base\Cache;
+use PSFS\base\config\Config;
 
 /**
  * Trait NOSQLParserTrait
@@ -75,7 +76,10 @@ trait NOSQLParserTrait {
         if(empty($this->domain)) {
             throw new NOSQLParserException(t('Domain not defined'), NOSQLParserException::NOSQL_PARSER_DOMAIN_NOT_DEFINED);
         }
-        $schemaFilename = CORE_DIR . DIRECTORY_SEPARATOR . $this->domain . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
+        //$schemaFilename = CORE_DIR . DIRECTORY_SEPARATOR . $this->domain . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
+        $schemaFilename = Config::getParam("nosql.schema.path", VENDOR_DIR . DIRECTORY_SEPARATOR . "tks" . DIRECTORY_SEPARATOR .
+                    strtolower($this->domain) . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . $this->domain .
+                    DIRECTORY_SEPARATOR . "Config". DIRECTORY_SEPARATOR . "schema.json");
         if(file_exists($schemaFilename)) {
             $schema = Cache::getInstance()->getDataFromFile($schemaFilename, Cache::JSON, true);
             $class = get_called_class();
