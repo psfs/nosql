@@ -138,7 +138,7 @@ abstract class NOSQLActiveRecord {
         }
         $collection = $con->selectCollection($this->getSchema()->name);
         try {
-            $dtos = $this->prepareInsertDtos($data, $con);
+            [$dtos, $data] = $this->prepareInsertDtos($data, $con);
             $result = $collection->insertMany($data);
             $ids = $result->getInsertedIds();
             $inserts = $this->parseInsertedDtos($con, $ids, $dtos);
@@ -182,16 +182,22 @@ abstract class NOSQLActiveRecord {
     {
         $dtos = [];
         /** @var NOSQLModelDto $dto */
-        foreach ($data as $insertData) {
-            $dto = $this->getDtoCopy(true);
-            $dto->fromArray($insertData);
+        foreach ($data as &$insertData) {
+            if(is_object($insertData) && $insertData instanceof NOSQLModelDto) {
+                $dto = clone $insertData;
+            } else {
+                $dto = $this->getDtoCopy(true);
+                $dto->fromArray($insertData);
+            }
+            $dto->validate();
             $dto->setLastUpdate();
-            $dtos[] = $dto;
             self::invokeHook($this, $dto, 'preInsert', $con);
             self::invokeHook($this, $dto, 'preSave', $con);
+            $dtos[] = $dto;
+            $insertData = $dto->toArray();
         }
         unset($dto);
-        return $dtos;
+        return [$dtos, $data];
     }
 
     /**
@@ -206,7 +212,12 @@ abstract class NOSQLActiveRecord {
         $inserts = 0;
         foreach ($ids as $index => $insertedId) {
             $id = $insertedId->jsonSerialize();
-            $dtos[$index]->setPk($id['$oid']);
+            $dto = $dtos[$index];
+            if($dto instanceof  NOSQLModelDto) {
+                $dto->setPk($id['$oid']);
+            } else {
+
+            }
             self::invokeHook($this, $dtos[$index], 'postInsert', $con);
             self::invokeHook($this, $dtos[$index], 'postSave', $con);
             $inserts++;

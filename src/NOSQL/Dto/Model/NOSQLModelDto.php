@@ -163,6 +163,9 @@ abstract class NOSQLModelDto extends Dto {
                     $errors[] = $property->getName();
                 }
                 break;
+            case NOSQLBase::NOSQL_TYPE_OBJECT:
+                $property->setValue($this, json_decode($value, true));
+                break;
             case NOSQLBase::NOSQL_TYPE_ARRAY:
                 if (!is_array($value)) {
                     $errors[] = $property->getName();
@@ -175,6 +178,7 @@ abstract class NOSQLModelDto extends Dto {
                 $property->setValue($this, (bool)$value);
                 break;
             case NOSQLBase::NOSQL_TYPE_DATE:
+            case NOSQLBase::NOSQL_TYPE_TIMESTAMP:
                 $dateTime = new \DateTime($value, new \DateTimeZone('UTC'));
                 if(!$dateTime) {
                     $errors[] = $property->getName();
