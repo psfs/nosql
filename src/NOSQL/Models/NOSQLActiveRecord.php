@@ -150,6 +150,42 @@ abstract class NOSQLActiveRecord {
     }
 
     /**
+     * Function to make a bulk upsert of documents
+     * @param array $data
+     * @param string $id
+     * @param Database|null $con
+     * @return int
+     */
+    public function bulkUpsert(array $data, $id, Database $con = null) {
+        $upserts = 0;
+        $filters = $options = [];
+
+        if(null === $con) {
+            $con = ParserService::getInstance()->createConnection($this->getDomain());
+        }
+        $collection = $con->selectCollection($this->getSchema()->name);
+
+        foreach($data as $item) {
+            try {
+                $filters[$id] = ['$eq' => $item[$id]];
+                $updateSet = [];
+                $updateSet['$set'] = $item;
+                $options['upsert'] = true;
+
+                $updated = $collection->updateOne($filters, $updateSet, $options);
+
+                if (null !== $updated) {
+                    $upserts += $updated->getModifiedCount();
+                }
+            } catch (\Exception $exception) {
+                Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
+            }
+        }
+
+        return $upserts;
+    }
+
+    /**
      * @param Database|null $con
      * @return bool
      */
@@ -170,6 +206,27 @@ abstract class NOSQLActiveRecord {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $deleted;
+    }
+
+    /**
+     * Function to make a bulk delete of documents
+     * @param array $filters
+     * @param Database|null $con
+     * @return int
+     */
+    public function bulkDelete(array $filters, Database $con = null) {
+        $deletedCount = 0;
+        if(null === $con) {
+            $con = ParserService::getInstance()->createConnection($this->getDomain());
+        }
+        $collection = $con->selectCollection($this->getSchema()->name);
+        try {
+            $result = $collection->deleteMany($filters);
+            $deletedCount = $result->getDeletedCount();
+        } catch(\Exception $exception) {
+            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
+        }
+        return $deletedCount;
     }
 
     /**
