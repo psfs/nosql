@@ -49,6 +49,7 @@ final class NOSQLQuery {
         $resultSet->count = $collection->countDocuments($filters);
         $nosqlOptions = [
             'limit' => (integer)(array_key_exists(Api::API_LIMIT_FIELD, $criteria) ? $criteria[Api::API_LIMIT_FIELD] : Config::getParam('pagination.limit', 50)),
+            'skip' => (integer)(array_key_exists(Api::API_PAGE_FIELD, $criteria) ? $criteria[Api::API_PAGE_FIELD] : 1)
         ];
         $results = $collection->find($filters, $nosqlOptions);
         /** @var  $result */

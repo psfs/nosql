@@ -2,6 +2,7 @@
 namespace NOSQL\Models;
 
 use MongoDB\BSON\ObjectId;
+use MongoDB\BulkWriteResult;
 use MongoDB\Database;
 use NOSQL\Dto\Model\NOSQLModelDto;
 use NOSQL\Exceptions\NOSQLValidationException;
@@ -158,28 +159,30 @@ abstract class NOSQLActiveRecord {
      */
     public function bulkUpsert(array $data, $id, Database $con = null) {
         $upserts = 0;
-        $filters = $options = [];
+        $filter = $options = [];
 
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
         $collection = $con->selectCollection($this->getSchema()->name);
 
-        foreach($data as $item) {
-            try {
-                $filters[$id] = ['$eq' => $item[$id]];
-                $updateSet = [];
-                $updateSet['$set'] = $item;
+        $operations = [];
+        try {
+            foreach($data as $item) {
+                $filter[$id] = ['$eq' => $item[$id]];
+                $update = [];
+                $update['$set'] = $item;
                 $options['upsert'] = true;
-
-                $updated = $collection->updateOne($filters, $updateSet, $options);
-
-                if (null !== $updated) {
-                    $upserts += $updated->getModifiedCount();
-                }
-            } catch (\Exception $exception) {
-                Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
+                $operation = [
+                    "updateOne" => [$filter, $update, $options]
+                ];
+                $operations[] = $operation;
             }
+            /** @var BulkWriteResult $result */
+            $result = $collection->bulkWrite($operations);
+            $upserts = $result->getModifiedCount();
+        } catch (\Exception $exception) {
+            Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
 
         return $upserts;
