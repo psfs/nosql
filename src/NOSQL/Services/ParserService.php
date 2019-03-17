@@ -32,7 +32,7 @@ final class ParserService extends  Singleton {
             $dns .= '&authSource=admin&serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000&retryWrites=true';
         } else {
             $dns .= ':' . Config::getParam('nosql.port', '27017', $lowerDomain);
-            $dns .= '/' . $database;
+            $dns .= '/' . $database . "?authSource=admin";
         }
         $client = new Client($dns);
         return $client->selectDatabase($database);

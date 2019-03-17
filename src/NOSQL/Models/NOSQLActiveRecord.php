@@ -158,16 +158,26 @@ abstract class NOSQLActiveRecord {
      * @return int
      */
     public function bulkUpsert(array $data, $id, Database $con = null) {
-        $upserts = 0;
-        $filter = $options = [];
-
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
         $collection = $con->selectCollection($this->getSchema()->name);
 
-        $operations = [];
+        $upserts = 0;
+        $filter = $options = $operations = [];
         try {
+            // Check index collation
+            $indexes = $collection->listIndexes();
+            foreach($indexes as $index) {
+                $indexInfo = $index->__debugInfo();
+                $keys = array_keys($index["key"]);
+                if ((count($keys) === 1) && ($keys[0] === $id) && (array_key_exists("collation", $indexInfo))) {
+                    $collation = $indexInfo["collation"];
+                    $options["collation"] = ["locale" => $collation["locale"], "strength" => $collation["strength"]];
+                    break;
+                }
+            }
+
             foreach($data as $item) {
                 $filter[$id] = ['$eq' => $item[$id]];
                 $update = [];

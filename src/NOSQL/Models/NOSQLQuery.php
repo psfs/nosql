@@ -2,15 +2,21 @@
 namespace NOSQL\Models;
 
 use MongoDB\BSON\ObjectId;
+use MongoDB\Collection;
 use MongoDB\Database;
 use NOSQL\Services\Base\NOSQLBase;
 use NOSQL\Dto\Model\ResultsetDto;
 use NOSQL\Models\base\NOSQLParserTrait;
 use PSFS\base\config\Config;
 use PSFS\base\exception\ApiException;
-use PSFS\base\types\Api;
 
 final class NOSQLQuery {
+    const NOSQL_ORDER_FIELD = '__order';
+    const NOSQL_SORT_FIELD = '__sort';
+    const NOSQL_PAGE_FIELD = '__page';
+    const NOSQL_LIMIT_FIELD = '__limit';
+    const NOSQL_COLLATION_FIELD = '__collation';
+
     /**
      * @param $pk
      * @param Database|null $con
@@ -45,12 +51,19 @@ final class NOSQLQuery {
         $collection = $con->selectCollection($model->getSchema()->name);
         $resultSet = new ResultsetDto(false);
         // TODO create Query model for it
-        $filters = self::parseCriteria($criteria, $model);
-        $resultSet->count = $collection->countDocuments($filters);
-        $nosqlOptions = [
-            'limit' => (integer)(array_key_exists(Api::API_LIMIT_FIELD, $criteria) ? $criteria[Api::API_LIMIT_FIELD] : Config::getParam('pagination.limit', 50)),
-            'skip' => (integer)(array_key_exists(Api::API_PAGE_FIELD, $criteria) ? $criteria[Api::API_PAGE_FIELD] : 1)
-        ];
+        [$filters, $nosqlOptions] = self::parseCriteria($criteria, $model, $collection);
+
+        $resultSet->count = $collection->countDocuments($filters, $nosqlOptions);
+
+        $nosqlOptions["limit"] = (integer)(array_key_exists(self::NOSQL_LIMIT_FIELD, $criteria) ? $criteria[self::NOSQL_LIMIT_FIELD] : Config::getParam('pagination.limit', 50));
+        $nosqlOptions["skip"] = (integer)(array_key_exists(self::NOSQL_PAGE_FIELD, $criteria) ? $criteria[self::NOSQL_PAGE_FIELD] : 0);
+
+        if (array_key_exists(self::NOSQL_SORT_FIELD, $criteria)) {
+            $nosqlOptions["sort"] = [];
+            $nosqlOptions["sort"][$criteria[self::NOSQL_SORT_FIELD]] = (array_key_exists(self::NOSQL_ORDER_FIELD, $criteria)) ?
+                                                                        $criteria[self::NOSQL_ORDER_FIELD] : 1;
+        }
+
         $results = $collection->find($filters, $nosqlOptions);
         /** @var  $result */
         $items = $results->toArray();
@@ -66,7 +79,7 @@ final class NOSQLQuery {
      * @param NOSQLActiveRecord $model
      * @return array
      */
-    private static function parseCriteria(array $criteria, NOSQLActiveRecord $model)
+    private static function parseCriteria(array $criteria, NOSQLActiveRecord $model, Collection $collection)
     {
         $filters = [];
         foreach ($model->getSchema()->properties as $property) {
@@ -75,7 +88,29 @@ final class NOSQLQuery {
                 $filters[$property->name] = $filterValue;
             }
         }
-        return $filters;
+
+        // Check index collation
+        $options = [];
+        $indexes = $collection->listIndexes();
+        foreach($indexes as $index) {
+            $indexInfo = $index->__debugInfo();
+            if (empty(array_diff(array_keys($index["key"]), array_keys($filters)))) {
+                if (array_key_exists("collation", $indexInfo)) {
+                    $collation = $indexInfo["collation"];
+                    $options["collation"] = ["locale" => $collation["locale"], "strength" => $collation["strength"]];
+                    break;
+                }
+            }
+        }
+
+        if (array_key_exists("collation", $options)) {
+            foreach($filters as $key=>$filter) {
+                if (is_string($criteria[$key])) {
+                    $filters[$key] = $criteria[$key];
+                }
+            }
+        }
+        return [$filters, $options];
     }
 
     /**
@@ -117,8 +152,8 @@ final class NOSQLQuery {
             ];
         } else {
             $filterValue = [
-                '$regex' => $filterValue,
-                '$options' => 'i',
+                '$regex' => '^' . $filterValue . '$',
+                '$options' => 'i'
             ];
         }
         return $filterValue;
