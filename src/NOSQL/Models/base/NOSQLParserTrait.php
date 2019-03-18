@@ -76,8 +76,8 @@ trait NOSQLParserTrait {
         if(empty($this->domain)) {
             throw new NOSQLParserException(t('Domain not defined'), NOSQLParserException::NOSQL_PARSER_DOMAIN_NOT_DEFINED);
         }
-        $pahts = GeneratorHelper::getDomainPaths($this->domain);
-        $schemaFilename = $pahts['base'] . DIRECTORY_SEPARATOR . $this->domain . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
+        $paths = GeneratorHelper::getDomainPaths($this->domain);
+        $schemaFilename = $paths['base'] . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
         if(file_exists($schemaFilename)) {
             $schema = Cache::getInstance()->getDataFromFile($schemaFilename, Cache::JSON, true);
             $class = get_called_class();

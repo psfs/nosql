@@ -4,6 +4,12 @@
     "keywords": ["php", "library", "nosql", "api", "RESTful", "psfs"],
     "homepage": "https://github.com/psfs/nosql",
     "type": "library",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/psfs/core.git"
+        }
+    ],
     "require": {
         "psfs/core": "dev-master",
         "ext-mongodb": "^1.5",
