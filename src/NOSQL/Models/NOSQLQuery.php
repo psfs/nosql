@@ -152,7 +152,7 @@ final class NOSQLQuery {
             ];
         } else {
             $filterValue = [
-                '$regex' => '^' . $filterValue . '$',
+                '$regex' => $filterValue,
                 '$options' => 'i'
             ];
         }
