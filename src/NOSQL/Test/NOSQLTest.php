@@ -12,30 +12,44 @@ use PHPUnit\Framework\TestCase;
 class NOSQLTest extends TestCase {
 
     public function testConnection() {
-        // TODO
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     public function testGenerate() {
-        // TODO
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     public function testInsert() {
-        // TODO
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     public function testUpdate() {
-        // TODO
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     public function testDelete() {
-        // TODO
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     public function testBulkInsert() {
-        // TODO
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 
     public function testForms() {
-        // TODO
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
     }
 }

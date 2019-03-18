@@ -6,9 +6,16 @@ php:
   - '7.2'
   - '7.3'
 
+before_install:
+  - echo "extension = <extension>.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
 install:
   - composer self-update
   - composer install -o
 
 after_deploy:
   - phpunit
+
+services:
+  - mongodb
+  - redis-server

@@ -10,7 +10,7 @@ use PSFS\base\types\helpers\ApiFormHelper;
  * Trait NOSQLManagetTrait
  * @package NOSQL\Services\base
  */
-trait NOSQLManagetTrait {
+trait NOSQLManagerTrait {
     /**
      * @label Returns form data for any nosql document
      * @POST

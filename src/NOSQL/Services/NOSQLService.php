@@ -98,7 +98,8 @@ class NOSQLService extends Service {
      */
     public function getCollections($module) {
         $collections = [];
-        $schemaFilename = CORE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
+        $path = GeneratorHelper::getDomainPaths($module);
+        $schemaFilename = $path['base'] . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
         if(file_exists($schemaFilename)) {
             $collections = $this->cache->getDataFromFile($schemaFilename, Cache::JSON, TRUE);
         }
@@ -165,7 +166,7 @@ class NOSQLService extends Service {
 
     /**
      * @param Database $db
-     * @param $collection
+     * @param $collectionDto
      */
     private function createIndexes(Database $db, $collectionDto) {
         try {

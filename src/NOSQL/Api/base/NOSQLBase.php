@@ -4,7 +4,7 @@ namespace NOSQL\Api\base;
 use NOSQL\Dto\Model\ResultsetDto;
 use NOSQL\Models\NOSQLActiveRecord;
 use NOSQL\Models\NOSQLQuery;
-use NOSQL\Services\Base\NOSQLManagetTrait;
+use NOSQL\Services\Base\NOSQLManagerTrait;
 use PSFS\base\dto\JsonResponse;
 use PSFS\base\Logger;
 use PSFS\base\types\CustomApi;
@@ -16,7 +16,7 @@ use PSFS\base\types\CustomApi;
  * @property NOSQLActiveRecord $model
  */
 abstract class NOSQLBase extends CustomApi {
-    use NOSQLManagetTrait;
+    use NOSQLManagerTrait;
 
     const NOSQL_MODEL_PRIMARY_KEY = '_id';
     /**
