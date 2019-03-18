@@ -7,7 +7,7 @@ php:
   - '7.3'
 
 before_install:
-  - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo "extension = mongo" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 install:
   - composer self-update
