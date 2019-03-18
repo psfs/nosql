@@ -9,12 +9,9 @@ use NOSQL\Dto\Model\ResultsetDto;
 use NOSQL\Models\base\NOSQLParserTrait;
 use PSFS\base\config\Config;
 use PSFS\base\exception\ApiException;
+use PSFS\base\types\Api;
 
 final class NOSQLQuery {
-    const NOSQL_ORDER_FIELD = '__order';
-    const NOSQL_SORT_FIELD = '__sort';
-    const NOSQL_PAGE_FIELD = '__page';
-    const NOSQL_LIMIT_FIELD = '__limit';
     const NOSQL_COLLATION_FIELD = '__collation';
 
     /**
@@ -53,15 +50,17 @@ final class NOSQLQuery {
         // TODO create Query model for it
         [$filters, $nosqlOptions] = self::parseCriteria($criteria, $model, $collection);
 
-        $resultSet->count = $collection->countDocuments($filters, $nosqlOptions);
+        $resultSet->count = $collection->count($filters, $nosqlOptions);
 
-        $nosqlOptions["limit"] = (integer)(array_key_exists(self::NOSQL_LIMIT_FIELD, $criteria) ? $criteria[self::NOSQL_LIMIT_FIELD] : Config::getParam('pagination.limit', 50));
-        $nosqlOptions["skip"] = (integer)(array_key_exists(self::NOSQL_PAGE_FIELD, $criteria) ? $criteria[self::NOSQL_PAGE_FIELD] : 0);
+        $nosqlOptions["limit"] = (integer)(array_key_exists(Api::API_LIMIT_FIELD, $criteria) ? $criteria[Api::API_LIMIT_FIELD] : Config::getParam('pagination.limit', 50));
+        $page = (integer)(array_key_exists(Api::API_PAGE_FIELD, $criteria) ? $criteria[Api::API_PAGE_FIELD] : 1);
+        $nosqlOptions["skip"] = ($page === 1) ? 0 : ($page - 1) * $nosqlOptions["limit"];
 
-        if (array_key_exists(self::NOSQL_SORT_FIELD, $criteria)) {
+        if ((array_key_exists(Api::API_ORDER_FIELD, $criteria)) && (is_array($criteria[Api::API_ORDER_FIELD]))) {
             $nosqlOptions["sort"] = [];
-            $nosqlOptions["sort"][$criteria[self::NOSQL_SORT_FIELD]] = (array_key_exists(self::NOSQL_ORDER_FIELD, $criteria)) ?
-                                                                        $criteria[self::NOSQL_ORDER_FIELD] : 1;
+            foreach ($criteria[Api::API_ORDER_FIELD] as $field => $direction) {
+                $nosqlOptions["sort"][$field] = (abs($direction) === 1)  ? $direction : 1;
+            }
         }
 
         $results = $collection->find($filters, $nosqlOptions);
