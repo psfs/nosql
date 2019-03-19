@@ -13,6 +13,7 @@ use PSFS\base\types\Api;
 
 final class NOSQLQuery {
     const NOSQL_COLLATION_FIELD = '__collation';
+    const NOSQL_IN_OPERATOR = '$in';
 
     /**
      * @param $pk
@@ -81,6 +82,10 @@ final class NOSQLQuery {
     private static function parseCriteria(array $criteria, NOSQLActiveRecord $model, Collection $collection)
     {
         $filters = [];
+        if (array_key_exists(Api::API_COMBO_FIELD, $criteria)) {
+            $filters['$text'] = ['$search' => $criteria[Api::API_COMBO_FIELD]];
+        }
+
         foreach ($model->getSchema()->properties as $property) {
             if (array_key_exists($property->name, $criteria)) {
                 $filterValue = self::composeFilter($criteria, $property);
@@ -122,7 +127,7 @@ final class NOSQLQuery {
         $filterValue = $criteria[$property->name];
         if (is_array($filterValue)) {
             $filterValue = [
-                '$in' => $filterValue,
+                self::NOSQL_IN_OPERATOR => $filterValue,
             ];
         } elseif (in_array($property->type, [
             NOSQLBase::NOSQL_TYPE_BOOLEAN,
