@@ -10,6 +10,7 @@ use NOSQL\Dto\Validation\NumberPropertyDto;
 use NOSQL\Dto\Validation\StringPropertyDto;
 use NOSQL\Services\Base\NOSQLBase;
 use PSFS\base\Cache;
+use PSFS\base\config\Config;
 use PSFS\base\dto\Field;
 use PSFS\base\Logger;
 use PSFS\base\Service;
@@ -210,7 +211,9 @@ class NOSQLService extends Service {
                     $success = false;
                 }
             }
-            $this->createIndexes($db, $raw);
+            if (Config::getParam("nosql.sync.create.index", true, "DGT")) {
+                $this->createIndexes($db, $raw);
+            }
         }
         return $success;
     }
