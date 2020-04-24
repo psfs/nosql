@@ -12,10 +12,13 @@ use NOSQL\Services\Base\NOSQLBase;
 use PSFS\base\Cache;
 use PSFS\base\config\Config;
 use PSFS\base\dto\Field;
+use PSFS\base\exception\ApiException;
 use PSFS\base\Logger;
+use PSFS\base\Router;
 use PSFS\base\Service;
 use PSFS\base\Template;
 use PSFS\base\types\helpers\GeneratorHelper;
+use PSFS\base\types\helpers\RouterHelper;
 
 /**
 * Class NOSQLService
@@ -99,7 +102,17 @@ class NOSQLService extends Service {
      */
     public function getCollections($module) {
         $collections = [];
-        $path = GeneratorHelper::getDomainPaths($module);
+        $domains = Router::getInstance()->getDomains();
+        $path = null;
+        foreach($domains as $domain => $paths) {
+            if(preg_match("/^@" . $module . "\//i", $domain)) {
+                $path = $paths;
+                break;
+            }
+        }
+        if(null === $path) {
+            throw new ApiException(t("Module not found"), 404);
+        }
         $schemaFilename = $path['base'] . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
         if(file_exists($schemaFilename)) {
             $collections = $this->cache->getDataFromFile($schemaFilename, Cache::JSON, TRUE);
