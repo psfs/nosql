@@ -281,7 +281,7 @@ abstract class NOSQLActiveRecord {
     {
         $inserts = 0;
         foreach ($ids as $index => $insertedId) {
-            $id = $insertedId->jsonSerialize();
+            $id = is_string($insertedId) ? ['$oid' => $insertedId] : $insertedId->jsonSerialize();
             $dto = $dtos[$index];
             if($dto instanceof  NOSQLModelDto) {
                 $dto->setPk($id['$oid']);
