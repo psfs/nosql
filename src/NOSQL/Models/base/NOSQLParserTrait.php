@@ -7,6 +7,7 @@ use NOSQL\Dto\IndexDto;
 use NOSQL\Dto\PropertyDto;
 use NOSQL\Exceptions\NOSQLParserException;
 use NOSQL\Models\NOSQLActiveRecord;
+use NOSQL\Services\NOSQLService;
 use NOSQL\Services\ParserService;
 use PSFS\base\Cache;
 use PSFS\base\types\helpers\GeneratorHelper;
@@ -76,7 +77,7 @@ trait NOSQLParserTrait {
         if(empty($this->domain)) {
             throw new NOSQLParserException(t('Domain not defined'), NOSQLParserException::NOSQL_PARSER_DOMAIN_NOT_DEFINED);
         }
-        $paths = GeneratorHelper::getDomainPaths($this->domain);
+        $paths = NOSQLService::getDomainPaths($this->domain);
         $schemaFilename = $paths['base'] . 'Config' . DIRECTORY_SEPARATOR . 'schema.json';
         if(file_exists($schemaFilename)) {
             $schema = Cache::getInstance()->getDataFromFile($schemaFilename, Cache::JSON, true);

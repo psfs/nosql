@@ -96,12 +96,7 @@ class NOSQLService extends Service {
         return $domains;
     }
 
-    /**
-     * @param string $module
-     * @return array
-     */
-    public function getCollections($module) {
-        $collections = [];
+    public static function getDomainPaths($module) {
         $domains = Router::getInstance()->getDomains();
         $path = null;
         foreach($domains as $domain => $paths) {
@@ -110,6 +105,16 @@ class NOSQLService extends Service {
                 break;
             }
         }
+        return $path;
+    }
+
+    /**
+     * @param string $module
+     * @return array
+     */
+    public function getCollections($module) {
+        $collections = [];
+        $path = self::getDomainPaths($module);
         if(null === $path) {
             throw new ApiException(t("Module not found"), 404);
         }
