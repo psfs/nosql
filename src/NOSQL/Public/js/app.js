@@ -107,7 +107,13 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
         };
 
         $scope.addNewIndex = () => {
-
+            let _ts = (new Date()).getTime();
+            $scope.collection.indexes.push({
+                id: _ts,
+                unique: false,
+                properties: [],
+                name: _ts
+            });
         };
 
         $scope.createCollection = () => {
@@ -115,7 +121,8 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
             $scope.collections.push({
                 id: _ts,
                 name: 'new_' + _ts,
-                properties: []
+                properties: [],
+                indexes: []
             });
             for(let i in $scope.collections) {
                 let collection = $scope.collections[i];
@@ -141,6 +148,9 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
             $scope.collection = null;
             if(change) {
                 $scope.collection = collection;
+            }
+            if(!$scope.collection.hasOwnProperty('indexes')) {
+                $scope.collection['indexes'] = [];
             }
             $msgSrv.send('load.ui');
         };
@@ -204,6 +214,10 @@ app.controller('NOSQLCtrl', ['$scope', '$httpSrv', '$msgSrv', '$timeout',
         // Listeners
         $scope.$on('property.remove', (ev, index) => {
             $scope.collection.properties.splice(index, 1);
+        });
+
+        $scope.$on('index.remove', (ev, index) => {
+            $scope.collection.indexes.splice(index, 1);
         });
 
         $scope.$on('show.message', (ev, message) => {

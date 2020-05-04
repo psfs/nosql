@@ -36,7 +36,7 @@
                     <property data-types="types" data-model="property" data-index="$index" ng-repeat="property in collection.properties"></property>
                 </div>
                 <div role="tabpanel" class="tab-pane" ng-class="{'active':tab === 'indexes'}" id="indexes">
-                    <p class="well text-center">{{ "Dentro de poco..."|trans }}</p>
+                    <indexes data-properties="collection.properties" data-model="index" data-index="$index" ng-repeat="index in collection.indexes"></indexes>
                 </div>
             </div>
         </div>

@@ -24,6 +24,7 @@
 {% endblock body_content %}
 {% block scripts %}
     <script type="text/ng-template" id="/js/composer/property.html">{% include '@NOSQL/composer/property.html.twig' %}</script>
+    <script type="text/ng-template" id="/js/composer/index.html">{% include '@NOSQL/composer/indexes.html.twig' %}</script>
     <script type="text/javascript">
         var translations = angular.merge(translations || {}, {
             dialog_title: '{{ "NOSQL Composer"|trans }}',
@@ -39,6 +40,7 @@
     '@ROOT/js/api/api-srv.js'
     '@NOSQL/js/app.js'
     '@NOSQL/js/composer/property.js'
+    '@NOSQL/js/composer/index.js'
     %}{% endscript %}
 {% endblock scripts %}
 

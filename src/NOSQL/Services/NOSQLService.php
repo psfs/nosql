@@ -151,6 +151,7 @@ class NOSQLService extends Service {
                     'domain' => $module,
                     'model' => $collection->name,
                     'properties' => $collection->properties,
+                    'indexes' => $collection->indexes,
                 ]);
                 $force = false;
                 if(false !== strpos($template, 'dto') || false !== strpos(strtolower($template), 'base')) {
@@ -187,9 +188,8 @@ class NOSQLService extends Service {
      * @param Database $db
      * @param $collectionDto
      */
-    private function createIndexes(Database $db, $collectionDto) {
+    private function createTextIndex(Database $db, $collectionDto) {
         try {
-            $collection = $db->selectCollection($collectionDto['name']);
             $textIndexes = [];
             foreach($collectionDto['properties'] as $property) {
                 if(in_array($property['type'], [NOSQLBase::NOSQL_TYPE_STRING, NOSQLBase::NOSQL_TYPE_OBJECT])) {
@@ -197,7 +197,25 @@ class NOSQLService extends Service {
                 }
             }
             if(count($textIndexes)) {
+                $collection = $db->selectCollection($collectionDto['name']);
                 $collection->createIndex($textIndexes, ['name' => 'idx_text_' . $collectionDto['name']]);
+            }
+        } catch (\Exception $exception) {
+            Logger::log($exception->getMessage(), LOG_DEBUG);
+        }
+    }
+
+    /**
+     * @param Database $db
+     * @param $collectionDto
+     * @param array $indexes
+     * @param array $options
+     */
+    private function createIndexes(Database $db, $collectionDto, array $indexes = []) {
+        try {
+            $collection = $db->selectCollection($collectionDto['name']);
+            if(count($indexes)) {
+                $collection->createIndexes($indexes);
             }
         } catch (\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_DEBUG);
@@ -229,9 +247,29 @@ class NOSQLService extends Service {
                     $success = false;
                 }
             }
-            if (Config::getParam("nosql.sync.create.index", true, "DGT")) {
-                $this->createIndexes($db, $raw);
+            if($success) {
+                if (Config::getParam("nosql.sync.defaultIndex", false, $module)) {
+                    $this->createTextIndex($db, $raw);
+                }
+                $indexToCreate = [];
+                foreach($raw['indexes'] as $index) {
+                    $dbIndex = [];
+                    foreach($index['properties'] as $idx) {
+                        list($property, $direction) = explode('.', $idx);
+                        switch(strtoupper($direction)) {
+                            case 'ASC': $dbIndex[$property] = 1; break;
+                            case 'DESC': $dbIndex[$property] = -1; break;
+                        }
+                    }
+                    $indexToCreate[] = [
+                        'key' => $dbIndex,
+                        'name' => $index['name'],
+                        'unique' => $index['unique'],
+                    ];
+                }
+                $this->createIndexes($db, $raw, $indexToCreate);
             }
+
         }
         return $success;
     }
