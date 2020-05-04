@@ -1,0 +1,27 @@
+<fieldset class="property col-xs-12" ng-cloak>
+    <legend data-toggle="tooltip" title="{{ "{{ model.description }}" }}">
+        <span ng-bind="getIndexLegend()"></span>&nbsp;
+        <i class="fa" ng-class="{'fa-edit':!show,'fa-eye':show}" ng-click="toggleIndexForm()"></i>
+        <i class="fa fa-trash" ng-click="removeIndex()"></i>
+    </legend>
+    <div class="row">
+        <div class="form-group col-xs-6" ng-show="show">
+            <label for="name_{{ '{{ model.id }}' }}" class="control-label">{{ 'Nombre del índice'|trans }}</label>
+            <input type="text" id="name_{{ '{{ model.id }}' }}" ng-model="model.name" required class="form-control">
+        </div>
+        <div class="form-group col-xs-6" ng-show="show">
+            <label for="unique_{{ '{{ model.id }}' }}" class="control-label">{{ 'Es único'|trans }}</label>
+            <select name="unique" id="unique_{{ '{{ model.id }}' }}" class="form-control" required ng-model="model.unique">
+                <option ng-value="false">{{ 'No'|trans }}</option>
+                <option ng-value="true">{{ 'Si'|trans }}</option>
+            </select>
+        </div>
+        <div class="form-group col-xs-12" ng-show="show">
+            <label for="properties_{{ '{{ model.id }}' }}" class="control-label">{{ 'Tipo de validación'|trans }}</label>
+            <select name="properties" id="properties_{{ '{{ model.id }}' }}" class="form-control" multiple required ng-model="model.properties">
+                <option ng-repeat="property in indexProperties track by property.id" ng-value="property.id"
+                        ng-bind="property.name + ' ' + property.mode"></option>
+            </select>
+        </div>
+    </div>
+</fieldset>
