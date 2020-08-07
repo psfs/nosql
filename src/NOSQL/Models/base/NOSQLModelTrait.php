@@ -46,7 +46,7 @@ trait NOSQLModelTrait {
     public function __call($name, $arguments)
     {
         if(preg_match('/^(set|get)/', $name)) {
-            $property = strtolower(str_replace(['set', 'Set', 'get', 'Get'], '', $name));
+            $property = lcfirst(str_replace(['set', 'Set', 'get', 'Get'], '', $name));
             if(false !== stripos($name, 'set')) {
                 $this->dto->$property = $arguments[0];
             } else {
