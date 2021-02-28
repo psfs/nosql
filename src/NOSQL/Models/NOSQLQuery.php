@@ -15,6 +15,7 @@ final class NOSQLQuery {
     const NOSQL_COLLATION_FIELD = '__collation';
     const NOSQL_IN_OPERATOR = '$in';
     const NOSQL_NOT_NULL_OPERATOR = '$ne';
+    const NOSQL_EQUAL_OPERATOR = '$eq';
 
     /**
      * @param $pk
@@ -126,11 +127,12 @@ final class NOSQLQuery {
     private static function composeFilter(array $criteria, \NOSQL\Dto\PropertyDto $property)
     {
         $filterValue = $criteria[$property->name];
+        $matchOperator = is_array($filterValue) ? $filterValue[0] : self::NOSQL_EQUAL_OPERATOR;
         if (is_array($filterValue)) {
-            if(in_array($filterValue[0], [
+            if(in_array($matchOperator, [
                 self::NOSQL_NOT_NULL_OPERATOR,
                 self::NOSQL_IN_OPERATOR,
-            ])) {
+            ], true)) {
                 $operator = array_shift($filterValue);
                 $value = array_shift($filterValue);
                 $filterValue = [
@@ -144,7 +146,7 @@ final class NOSQLQuery {
             }
         } elseif(in_array($filterValue, [
             self::NOSQL_NOT_NULL_OPERATOR,
-        ])) {
+        ], true)) {
             $filterValue = [
                 $filterValue => null,
             ];
@@ -152,7 +154,7 @@ final class NOSQLQuery {
             NOSQLBase::NOSQL_TYPE_BOOLEAN,
             NOSQLBase::NOSQL_TYPE_INTEGER,
             NOSQLBase::NOSQL_TYPE_DOUBLE,
-            NOSQLBase::NOSQL_TYPE_LONG])) {
+            NOSQLBase::NOSQL_TYPE_LONG], true)) {
             if ($property->type === NOSQLBase::NOSQL_TYPE_BOOLEAN) {
                 switch ($filterValue) {
                     case '1':
@@ -171,7 +173,7 @@ final class NOSQLQuery {
                 $filterValue = (float)$filterValue;
             }
             $filterValue = [
-                '$eq' => $filterValue,
+                self::NOSQL_EQUAL_OPERATOR => $filterValue,
             ];
         } else {
             $filterValue = [
