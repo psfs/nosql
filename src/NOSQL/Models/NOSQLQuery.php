@@ -14,6 +14,7 @@ use PSFS\base\types\Api;
 final class NOSQLQuery {
     const NOSQL_COLLATION_FIELD = '__collation';
     const NOSQL_IN_OPERATOR = '$in';
+    const NOSQL_NOT_NULL_OPERATOR = '$ne';
 
     /**
      * @param $pk
@@ -126,8 +127,26 @@ final class NOSQLQuery {
     {
         $filterValue = $criteria[$property->name];
         if (is_array($filterValue)) {
+            if(in_array($filterValue[0], [
+                self::NOSQL_NOT_NULL_OPERATOR,
+                self::NOSQL_IN_OPERATOR,
+            ])) {
+                $operator = array_shift($filterValue);
+                $value = array_shift($filterValue);
+                $filterValue = [
+                    $operator => $value,
+                ];
+            } else {
+                // Default case for back compatibility
+                $filterValue = [
+                    self::NOSQL_IN_OPERATOR => $filterValue,
+                ];
+            }
+        } elseif(in_array($filterValue, [
+            self::NOSQL_NOT_NULL_OPERATOR,
+        ])) {
             $filterValue = [
-                self::NOSQL_IN_OPERATOR => $filterValue,
+                $filterValue => null,
             ];
         } elseif (in_array($property->type, [
             NOSQLBase::NOSQL_TYPE_BOOLEAN,
