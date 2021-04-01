@@ -14,8 +14,14 @@ use PSFS\base\types\Api;
 final class NOSQLQuery {
     const NOSQL_COLLATION_FIELD = '__collation';
     const NOSQL_IN_OPERATOR = '$in';
+    const NOSQL_NOT_IN_OPERATOR = '$nin';
     const NOSQL_NOT_NULL_OPERATOR = '$ne';
     const NOSQL_EQUAL_OPERATOR = '$eq';
+    const NOSQL_NOT_EQUAL_OPERATOR = '$ne';
+    const NOSQL_LESS_OPERATOR = '$lt';
+    const NOSQL_LESS_EQUAL_OPERATOR = '$lte';
+    const NOSQL_GREATER_OPERATOR = '$gt';
+    const NOSQL_GREATER_EQUAL_OPERATOR = '$gte';
 
     /**
      * @param $pk
@@ -132,6 +138,13 @@ final class NOSQLQuery {
             if(in_array($matchOperator, [
                 self::NOSQL_NOT_NULL_OPERATOR,
                 self::NOSQL_IN_OPERATOR,
+                self::NOSQL_NOT_IN_OPERATOR,
+                self::NOSQL_EQUAL_OPERATOR,
+                self::NOSQL_NOT_EQUAL_OPERATOR,
+                self::NOSQL_LESS_OPERATOR,
+                self::NOSQL_LESS_EQUAL_OPERATOR,
+                self::NOSQL_GREATER_OPERATOR,
+                self::NOSQL_GREATER_EQUAL_OPERATOR,
             ], true)) {
                 $operator = array_shift($filterValue);
                 $value = array_shift($filterValue);
