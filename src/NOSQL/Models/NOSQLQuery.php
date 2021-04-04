@@ -23,6 +23,10 @@ final class NOSQLQuery {
     const NOSQL_GREATER_OPERATOR = '$gt';
     const NOSQL_GREATER_EQUAL_OPERATOR = '$gte';
 
+    public static $pipelines = [
+        '$lookup',
+    ];
+
     /**
      * @param $pk
      * @param Database|null $con
@@ -71,10 +75,27 @@ final class NOSQLQuery {
                 $nosqlOptions["sort"][$field] = (abs($direction) === 1)  ? $direction : 1;
             }
         }
-
-        $results = $collection->find($filters, $nosqlOptions);
-        /** @var  $result */
-        $items = $results->toArray();
+        $pipelines = [];
+        if(count($filters)) {
+            $pipelines[] = [
+                '$match' => $filters,
+            ];
+        }
+        if(array_key_exists(Api::API_ORDER_FIELD, $criteria)) {
+            $pipelines[] = [
+                '$sort' => $criteria[Api::API_ORDER_FIELD],
+            ];
+        }
+        $customPipelines = self::parsePipelines($criteria);
+        foreach($customPipelines as $customPipeline) {
+            $pipelines[] = $customPipeline;
+        }
+        if(array_key_exists(Api::API_LIMIT_FIELD, $criteria)) {
+            $pipelines[] = [
+                '$limit' => $criteria[Api::API_LIMIT_FIELD],
+            ];
+        }
+        $items = $collection->aggregate($pipelines);
         foreach($items as $item) {
             $model->feed($item->getArrayCopy(), true);
             $resultSet->items[] = $model->getDtoCopy(true);
@@ -123,6 +144,22 @@ final class NOSQLQuery {
             }
         }
         return [$filters, $options];
+    }
+
+    /**
+     * @param array $criteria
+     * @return array
+     */
+    private static function parsePipelines(array $criteria) {
+        $pipelines = [];
+        foreach($criteria as $key => $criterion) {
+            if(in_array(strtolower($key), self::$pipelines, true)) {
+                $pipelines[] = [
+                    $key => $criterion,
+                ];
+            }
+        }
+        return $pipelines;
     }
 
     /**

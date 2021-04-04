@@ -190,7 +190,7 @@ abstract class NOSQLActiveRecord {
             }
             /** @var BulkWriteResult $result */
             $result = $collection->bulkWrite($operations);
-            $upserts = $result->getModifiedCount();
+            $upserts = $result->getModifiedCount() + $result->getInsertedCount() + $result->getUpsertedCount();
         } catch (\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
