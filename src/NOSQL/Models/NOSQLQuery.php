@@ -8,6 +8,7 @@ use NOSQL\Services\Base\NOSQLBase;
 use NOSQL\Dto\Model\ResultsetDto;
 use NOSQL\Models\base\NOSQLParserTrait;
 use PSFS\base\config\Config;
+use PSFS\base\dto\Dto;
 use PSFS\base\exception\ApiException;
 use PSFS\base\types\Api;
 
@@ -25,6 +26,7 @@ final class NOSQLQuery {
 
     public static $pipelines = [
         '$lookup',
+        '$count',
     ];
 
     /**
@@ -44,6 +46,38 @@ final class NOSQLQuery {
             throw new ApiException(t('Document not found'), 404);
         }
         return $model;
+    }
+
+    public static function count($modelName, array $criteria, Database $con = null) {
+        /** @var NOSQLActiveRecord $model */
+        $model = new $modelName();
+        $con = NOSQLParserTrait::initConnection($model, $con);
+        $collection = $con->selectCollection($model->getSchema()->name);
+        $resultSet = new ResultsetDto(false);
+        // TODO create Query model for it
+        [$filters, $nosqlOptions] = self::parseCriteria($criteria, $model, $collection);
+        $pipelines = [];
+        if(count($filters)) {
+            $pipelines[] = [
+                '$match' => $filters,
+            ];
+        }
+        if(array_key_exists(Api::API_ORDER_FIELD, $criteria)) {
+            $pipelines[] = [
+                '$sort' => $criteria[Api::API_ORDER_FIELD],
+            ];
+        }
+        $criteria['$count'] = 'total_count';
+        $customPipelines = self::parsePipelines($criteria);
+        foreach($customPipelines as $customPipeline) {
+            $pipelines[] = $customPipeline;
+        }
+        $items = $collection->aggregate($pipelines);
+        foreach($items as $item) {
+            $data = $item->getArrayCopy();
+            $resultSet->items[] = $data['total_count'];
+        }
+        return $resultSet;
     }
 
     /**
