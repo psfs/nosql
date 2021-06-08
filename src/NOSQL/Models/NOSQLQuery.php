@@ -27,6 +27,11 @@ final class NOSQLQuery {
     public static $pipelines = [
         '$lookup',
         '$count',
+        '$unwind',
+        '$unset',
+        '$replaceroot',
+        '$mergeobjects',
+        '$match',
     ];
 
     /**
