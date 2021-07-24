@@ -22,6 +22,7 @@ final class ParserService extends  Singleton {
     public function createConnection($domain) {
         $lowerDomain = strtolower($domain);
         $protocol = Config::getParam('nosql.protocol', 'mongodb');
+        $authSource = Config::getParam('nosql.authDb', 'admin');
         $dns = $protocol . '://';
         $dns .= Config::getParam('nosql.user', '', $lowerDomain);
         $dns .= ':' . Config::getParam('nosql.password', '', $lowerDomain);
@@ -30,12 +31,12 @@ final class ParserService extends  Singleton {
         $database = Config::getParam('nosql.database', 'nosql', $lowerDomain);
         if(null !== Config::getParam('nosql.replicaset')) {
             $dns .= '/' . $database . '?ssl=true&replicaSet=' . Config::getParam('nosql.replicaset', null, $lowerDomain);
-            $dns .= '&authSource=admin&serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000';
+            $dns .= '&authSource=' . $authSource . '&serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000';
         } else {
             if(strtolower($protocol) !== 'mongodb+srv') {
                 $dns .= ':' . Config::getParam('nosql.port', '27017', $lowerDomain);
             }
-            $dns .= '/' . $database . "?authSource=admin";
+            $dns .= '/' . $database . "?authSource=" . $authSource;
         }
         $dns .= '&retryWrites=true&w=majority';
         $client = new Client($dns);
