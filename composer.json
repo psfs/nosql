@@ -12,7 +12,7 @@
         }
     ],
     "require": {
-        "psfs/core": "2.*",
+        "psfs/core": "dev-master",
         "ext-mongodb": "^1.5",
         "mongodb/mongodb": "^1.4.3"
     },
@@ -34,7 +34,7 @@
         "discard-changes": true,
         "apcu-autoloader": true,
         "platform": {
-            "php": "7.2"
+            "php": "8.2"
         }
     },
     "support": {
