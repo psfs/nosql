@@ -8,8 +8,6 @@
 if(!defined("BASE_DIR"))
 define("BASE_DIR", dirname( dirname(__DIR__) ) );
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'config.php';
-
 if(!function_exists("NOSQL_Autoloader")) {
     // autoloader
     function NOSQL_Autoloader( $class ) {
@@ -33,3 +31,5 @@ if(!function_exists("NOSQL_Autoloader")) {
     // register the autoloader
     spl_autoload_register( "NOSQL_Autoloader" );
 }
+
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'config.php';
