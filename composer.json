@@ -7,7 +7,7 @@
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/psfs/core.git"
+            "url": "git@bitbucket.org:tks-dev/core.git"
         }
     ],
     "require": {
