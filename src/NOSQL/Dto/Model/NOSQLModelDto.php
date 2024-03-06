@@ -107,15 +107,23 @@ abstract class NOSQLModelDto extends Dto {
         foreach($reflection->getProperties(\ReflectionProperty::IS_PUBLIC) as $property) {
             $required = InjectorHelper::checkIsRequired($property->getDocComment());
             $value = $property->getValue($this);
-            if($required && $this->checkEmpty($value)) {
-                if($throwException) {
-                    throw new NOSQLValidationException(t('Empty value for property ') . $property->getName(), NOSQLValidationException::NOSQL_VALIDATION_REQUIRED);
-                } else {
-                    $errors[] = $property->getName();
-                }
-            } else {
-                $this->checkType($throwException, $property, $value, $errors);
-            }
+
+			$isEmptyValue = $this->checkEmpty($value);
+			if ($isEmptyValue) {
+				if (!$required) {
+					// Do not validate empty values for optional fields.
+					continue;
+				}
+
+				// Throw errors for empty required fields.
+				if ($throwException) {
+					throw new NOSQLValidationException(t('Empty value for property ') . $property->getName(), NOSQLValidationException::NOSQL_VALIDATION_REQUIRED);
+				}
+				$errors[] = $property->getName();
+			}
+
+			// Check the type of filled values.
+	        $this->checkType($throwException, $property, $value, $errors);
         }
         return $errors;
     }
