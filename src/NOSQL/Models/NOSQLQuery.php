@@ -42,7 +42,7 @@ final class NOSQLQuery {
      */
     public static function findPk($modelName, $pk, Database $con = null) {
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($model, $con);
+        $con = NOSQLActiveRecord::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name);
         $result = $collection->findOne(['_id' => new ObjectId($pk)]);
         if(null !== $result) {
@@ -56,7 +56,7 @@ final class NOSQLQuery {
     public static function count($modelName, array $criteria, Database $con = null) {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($model, $con);
+        $con = NOSQLActiveRecord::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name);
         $resultSet = new ResultsetDto(false);
         // TODO create Query model for it
@@ -77,6 +77,11 @@ final class NOSQLQuery {
         foreach($customPipelines as $customPipeline) {
             $pipelines[] = $customPipeline;
         }
+        if(array_key_exists('custom_pipelines', $criteria)) {
+            foreach($criteria['custom_pipelines'] as $pipeline => $rules) {
+                $pipelines[] = [$pipeline => $rules];
+            };
+        }
         $items = $collection->aggregate($pipelines);
         foreach($items as $item) {
             $data = $item->getArrayCopy();
@@ -96,7 +101,7 @@ final class NOSQLQuery {
     public static function find($modelName, array $criteria, Database $con = null) {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($model, $con);
+        $con = NOSQLActiveRecord::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name);
         $resultSet = new ResultsetDto(false);
         // TODO create Query model for it
@@ -133,6 +138,11 @@ final class NOSQLQuery {
             $pipelines[] = [
                 '$limit' => $criteria[Api::API_LIMIT_FIELD],
             ];
+        }
+        if(array_key_exists('custom_pipelines', $criteria)) {
+            foreach($criteria['custom_pipelines'] as $pipeline => $rules) {
+                $pipelines[] = [$pipeline => $rules];
+            };
         }
         $items = $collection->aggregate($pipelines);
         foreach($items as $item) {

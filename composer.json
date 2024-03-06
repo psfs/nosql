@@ -1,5 +1,6 @@
 {
     "name": "psfs/nosql",
+    "version": "2.0.1",
     "description": "NOSQL package for PSFS",
     "keywords": ["php", "library", "nosql", "api", "RESTful", "psfs"],
     "homepage": "https://github.com/psfs/nosql",
@@ -33,7 +34,7 @@
         "discard-changes": true,
         "apcu-autoloader": true,
         "platform": {
-            "php": "7.2"
+            "php": "8.2"
         }
     },
     "support": {
