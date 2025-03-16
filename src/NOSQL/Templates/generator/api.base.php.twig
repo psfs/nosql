@@ -1,5 +1,5 @@
 <?php
-namespace {{ domain }}\Api\Base;
+namespace {{ domain }}\Api\base;
 
 use \NOSQL\Api\base\NOSQLBase;
 use \{{ domain }}\Models\{{ model }} as {{ model }}Model;
@@ -7,7 +7,7 @@ use \{{ domain }}\Models\{{ model }} as {{ model }}Model;
 /**
  * Class {{ model }}
  * @package {{ domain }}\Models
- * Generated at [{{ ""|date("Y-m-d H:i:s") }}]
+ * @version {{ get_config("version", "1.0") }}
  */
 abstract class {{ model }} extends NOSQLBase {
     const MODEL_CLASS = {{ model }}Model::class;

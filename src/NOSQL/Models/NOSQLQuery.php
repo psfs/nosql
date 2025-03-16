@@ -53,6 +53,19 @@ final class NOSQLQuery {
         return $model;
     }
 
+    private static function generateItems($model, $items) {
+        foreach($items as $item) {
+            $model->feed($item->getArrayCopy(), true);
+            yield $model->getDtoCopy(true);
+        }
+    }
+
+    private static function getItemIterator($items) {
+        foreach($items as $item) {
+            yield $item;
+        }
+    }
+
     public static function count($modelName, array $criteria, Database $con = null) {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
@@ -82,7 +95,7 @@ final class NOSQLQuery {
                 $pipelines[] = [$pipeline => $rules];
             };
         }
-        $items = $collection->aggregate($pipelines);
+        $items = self::getItemIterator($collection->aggregate($pipelines));
         foreach($items as $item) {
             $data = $item->getArrayCopy();
             $resultSet->items[] = $data['total_count'];
@@ -136,7 +149,7 @@ final class NOSQLQuery {
         }
         if(array_key_exists(Api::API_LIMIT_FIELD, $criteria)) {
             $pipelines[] = [
-                '$limit' => $criteria[Api::API_LIMIT_FIELD],
+                '$limit' => (int)$criteria[Api::API_LIMIT_FIELD],
             ];
         }
         if(array_key_exists('custom_pipelines', $criteria)) {
@@ -144,11 +157,8 @@ final class NOSQLQuery {
                 $pipelines[] = [$pipeline => $rules];
             };
         }
-        $items = $collection->aggregate($pipelines);
-        foreach($items as $item) {
-            $model->feed($item->getArrayCopy(), true);
-            $resultSet->items[] = $model->getDtoCopy(true);
-        }
+        $items = self::getItemIterator($collection->aggregate($pipelines));
+        $resultSet->items = self::generateItems($model, $items);
         return $resultSet;
     }
 

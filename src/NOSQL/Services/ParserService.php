@@ -21,15 +21,15 @@ final class ParserService extends  Singleton {
      */
     public function createConnection($domain) {
         $lowerDomain = strtolower($domain);
-        $protocol = Config::getParam('nosql.protocol', 'mongodb');
-        $authSource = Config::getParam('nosql.authDb', 'admin');
+        $protocol = Config::getParam('nosql.protocol', 'mongodb', $lowerDomain);
+        $authSource = Config::getParam('nosql.authDb', 'admin', $lowerDomain);
         $dns = $protocol . '://';
         $dns .= Config::getParam('nosql.user', '', $lowerDomain);
         $dns .= ':' . Config::getParam('nosql.password', '', $lowerDomain);
         $dns .= '@' . Config::getParam('nosql.host', 'localhost', $lowerDomain);
 
         $database = Config::getParam('nosql.database', 'nosql', $lowerDomain);
-        if(null !== Config::getParam('nosql.replicaset')) {
+        if(null !== Config::getParam('nosql.replicaset', null, $lowerDomain)) {
             $dns .= '/' . $database . '?ssl=true&replicaSet=' . Config::getParam('nosql.replicaset', null, $lowerDomain);
             $dns .= '&authSource=' . $authSource . '&serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000';
         } else {
