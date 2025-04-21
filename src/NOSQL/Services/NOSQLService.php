@@ -235,13 +235,11 @@ class NOSQLService extends Service {
             $jsonSchema = $this->parseCollection($raw);
             try {
                 /** @var BSONDocument $result */
-                $result = $db->createCollection($raw['name'], [
+                $db->createCollection($raw['name'], [
                     'validation' => [
                         '$jsonSchema' => $jsonSchema->toArray(),
                     ]
                 ]);
-                $response = $result->getArrayCopy();
-                $success = array_key_exists('ok', $response) && $response['ok'] > 0;
             } catch(\Exception $exception) {
                 if($exception->getCode() !== 48) {
                     $success = false;

@@ -14,8 +14,8 @@
     "require": {
         "php" : ">=8.0",
         "psfs/core": "dev-master",
-        "ext-mongodb": "^1.5",
-        "mongodb/mongodb": "^1.20"
+        "ext-mongodb": "*",
+        "mongodb/mongodb": "^2.0.0"
     },
     "require-dev": {
         "phpunit/phpunit": "11.5.10",
