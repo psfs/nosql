@@ -53,10 +53,14 @@ final class NOSQLQuery {
         return $model;
     }
 
-    private static function generateItems($model, $items) {
+    private static function generateItems($model, $items, $asArray = false) {
         foreach($items as $item) {
-            $model->feed($item->getArrayCopy(), true);
-            yield $model->getDtoCopy(true);
+            if($asArray) {
+                yield $item->getArrayCopy();
+            } else {
+                $model->feed($item->getArrayCopy(), true);
+                yield $model->getDtoCopy(true);
+            }
         }
     }
 
@@ -92,7 +96,8 @@ final class NOSQLQuery {
         }
         if(array_key_exists('custom_pipelines', $criteria)) {
             foreach($criteria['custom_pipelines'] as $pipeline => $rules) {
-                $pipelines[] = [$pipeline => $rules];
+                list($command, $key) = explode('_', $pipeline, 2);
+                $pipelines[] = [$command => $rules];
             };
         }
         $items = self::getItemIterator($collection->aggregate($pipelines));
@@ -107,11 +112,10 @@ final class NOSQLQuery {
      * @param string $modelName
      * @param array $criteria
      * @param Database|null $con
+     * @param bool $asArray
      * @return ResultsetDto
-     * @throws \NOSQL\Exceptions\NOSQLValidationException
-     * @throws \PSFS\base\exception\GeneratorException
      */
-    public static function find($modelName, array $criteria, Database $con = null) {
+    public static function find($modelName, array $criteria, Database $con = null, $asArray = false) {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
         $con = NOSQLActiveRecord::initConnection($model, $con);
@@ -154,11 +158,12 @@ final class NOSQLQuery {
         }
         if(array_key_exists('custom_pipelines', $criteria)) {
             foreach($criteria['custom_pipelines'] as $pipeline => $rules) {
-                $pipelines[] = [$pipeline => $rules];
-            };
+                list($command, $key) = explode('_', $pipeline, 2);
+                $pipelines[] = [$command => $rules];
+            }
         }
         $items = self::getItemIterator($collection->aggregate($pipelines));
-        $resultSet->items = self::generateItems($model, $items);
+        $resultSet->items = self::generateItems($model, $items, $asArray);
         return $resultSet;
     }
 
