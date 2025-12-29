@@ -4,9 +4,9 @@
 ### NOSQL Module for PSFS
 
 #### Requirements
-* php 7.3+
-* psfs/core v1+
-* ext-mongodb 1.4
-* mongodb/mongodb 1.5
+* php 8+
+* psfs/core v2+
+* ext-mongodb 1.6
+* mongodb/mongodb 2.1.0
 
 The module include an intuitive interface to manage the MongoDB collections
