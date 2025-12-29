@@ -8,6 +8,7 @@ use NOSQL\Dto\Model\NOSQLModelDto;
 use NOSQL\Exceptions\NOSQLValidationException;
 use NOSQL\Models\base\NOSQLModelTrait;
 use NOSQL\Models\base\NOSQLParserTrait;
+use NOSQL\Services\Helpers\NOSQLApiHelper;
 use NOSQL\Services\ParserService;
 use PSFS\base\Logger;
 use PSFS\base\types\traits\SingletonTrait;
@@ -63,7 +64,7 @@ abstract class NOSQLActiveRecord {
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
-        $collection = $con->selectCollection($this->getSchema()->name);
+        $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             $isInsert = $isUpdate = false;
             $this->prepareData();
@@ -75,7 +76,7 @@ abstract class NOSQLActiveRecord {
                 $this->preUpdate($con);
                 $isUpdate = true;
             }
-            $result = $collection->insertOne($this->toArray());
+            $result = $collection->insertOne($this->toArray(), NOSQLApiHelper::getReadPreferenceOptions());
             if($result->getInsertedCount() > 0) {
                 $id = $result->getInsertedId();
                 $this->dto->setPk($id->jsonSerialize()['$oid']);
@@ -106,14 +107,19 @@ abstract class NOSQLActiveRecord {
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
-        $collection = $con->selectCollection($this->getSchema()->name);
+        $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             $this->prepareData();
             $this->dto->setLastUpdate();
             $this->preUpdate($con);
             $data = $this->toArray();
             unset($data['_id']);
-            $collection->findOneAndReplace(['_id' => new ObjectId($this->dto->getPk())], $data);
+            $collection->findOneAndReplace(
+				[
+					'_id' => new ObjectId($this->dto->getPk())
+				],
+				$data,
+				NOSQLApiHelper::getReadPreferenceOptions());
             $this->postUpdate($con);
             $updated = true;
             $this->countAction();
@@ -137,10 +143,10 @@ abstract class NOSQLActiveRecord {
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
-        $collection = $con->selectCollection($this->getSchema()->name);
+        $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             [$dtos, $data] = $this->prepareInsertDtos($data, $con);
-            $result = $collection->insertMany($data);
+            $result = $collection->insertMany($data, NOSQLApiHelper::getReadPreferenceOptions());
             $ids = $result->getInsertedIds();
             $inserts = $this->parseInsertedDtos($con, $ids, $dtos);
             $this->setActionCount($inserts);
@@ -161,13 +167,13 @@ abstract class NOSQLActiveRecord {
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
-        $collection = $con->selectCollection($this->getSchema()->name);
+        $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
 
         $upserts = 0;
         $filter = $options = $operations = [];
         try {
             // Check index collation
-            $indexes = $collection->listIndexes();
+            $indexes = $collection->listIndexes(NOSQLApiHelper::getReadPreferenceOptions());
             foreach($indexes as $index) {
                 $indexInfo = $index->__debugInfo();
                 $keys = array_keys($index["key"]);
@@ -207,10 +213,14 @@ abstract class NOSQLActiveRecord {
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
-        $collection = $con->selectCollection($this->getSchema()->name);
+        $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             $this->preDelete($con);
-            $collection->deleteOne(['_id' => new ObjectId($this->dto->getPk())]);
+            $collection->deleteOne(
+				[
+					'_id' => new ObjectId($this->dto->getPk())
+				],
+	            NOSQLApiHelper::getReadPreferenceOptions());
             $this->postDelete($con);
             $deleted = true;
             $this->dto = null;
@@ -232,9 +242,9 @@ abstract class NOSQLActiveRecord {
         if(null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
         }
-        $collection = $con->selectCollection($this->getSchema()->name);
+        $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
-            $result = $collection->deleteMany($filters);
+            $result = $collection->deleteMany($filters, NOSQLApiHelper::getReadPreferenceOptions());
             $deletedCount = $result->getDeletedCount();
         } catch(\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());

@@ -4,9 +4,11 @@ namespace NOSQL\Models;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Collection;
 use MongoDB\Database;
+use MongoDB\Driver\ReadPreference;
 use NOSQL\Services\Base\NOSQLBase;
 use NOSQL\Dto\Model\ResultsetDto;
 use NOSQL\Models\base\NOSQLParserTrait;
+use NOSQL\Services\Helpers\NOSQLApiHelper;
 use PSFS\base\config\Config;
 use PSFS\base\dto\Dto;
 use PSFS\base\exception\ApiException;
@@ -42,9 +44,14 @@ final class NOSQLQuery {
      */
     public static function findPk($modelName, $pk, Database $con = null) {
         $model = new $modelName();
-        $con = NOSQLActiveRecord::initConnection($model, $con);
-        $collection = $con->selectCollection($model->getSchema()->name);
-        $result = $collection->findOne(['_id' => new ObjectId($pk)]);
+        $con = NOSQLParserTrait::initConnection($model, $con);
+        $collection = $con->selectCollection($model->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
+        $result = $collection->findOne(
+			[
+				'_id' => new ObjectId($pk)
+			],
+	        NOSQLApiHelper::getReadPreferenceOptions()
+        );
         if(null !== $result) {
             $model->feed($result->getArrayCopy());
         } else {
@@ -73,8 +80,8 @@ final class NOSQLQuery {
     public static function count($modelName, array $criteria, Database $con = null) {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLActiveRecord::initConnection($model, $con);
-        $collection = $con->selectCollection($model->getSchema()->name);
+        $con = NOSQLParserTrait::initConnection($model, $con);
+        $collection = $con->selectCollection($model->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         $resultSet = new ResultsetDto(false);
         // TODO create Query model for it
         [$filters, $nosqlOptions] = self::parseCriteria($criteria, $model, $collection);
@@ -109,17 +116,35 @@ final class NOSQLQuery {
     }
 
     /**
+     * @param $modelName
+     * @param array $criteria
+     * @param Database|null $con
+     * @return int
+     */
+    public static function deleteMany($modelName, array $criteria, Database $con = null) {
+        /** @var NOSQLActiveRecord $model */
+        $model = new $modelName();
+        $con = NOSQLParserTrait::initConnection($model, $con);
+        $collection = $con->selectCollection($model->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
+        [$filters, $nosqlOptions] = self::parseCriteria($criteria, $model, $collection);
+        $result = $collection->deleteMany($filters, NOSQLApiHelper::getReadPreferenceOptions());
+        return $result->getDeletedCount();
+    }
+
+    /**
      * @param string $modelName
      * @param array $criteria
      * @param Database|null $con
      * @param bool $asArray
      * @return ResultsetDto
+     * @throws \NOSQL\Exceptions\NOSQLValidationException
+     * @throws \PSFS\base\exception\GeneratorException
      */
     public static function find($modelName, array $criteria, Database $con = null, $asArray = false) {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLActiveRecord::initConnection($model, $con);
-        $collection = $con->selectCollection($model->getSchema()->name);
+        $con = NOSQLParserTrait::initConnection($model, $con);
+        $collection = $con->selectCollection($model->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         $resultSet = new ResultsetDto(false);
         // TODO create Query model for it
         [$filters, $nosqlOptions] = self::parseCriteria($criteria, $model, $collection);
@@ -160,9 +185,9 @@ final class NOSQLQuery {
             foreach($criteria['custom_pipelines'] as $pipeline => $rules) {
                 list($command, $key) = explode('_', $pipeline, 2);
                 $pipelines[] = [$command => $rules];
-            }
+            };
         }
-        $items = self::getItemIterator($collection->aggregate($pipelines));
+        $items = self::getItemIterator($collection->aggregate($pipelines, NOSQLApiHelper::getReadPreferenceOptions()));
         $resultSet->items = self::generateItems($model, $items, $asArray);
         return $resultSet;
     }
@@ -187,8 +212,8 @@ final class NOSQLQuery {
         }
 
         // Check index collation
-        $options = [];
-        $indexes = $collection->listIndexes();
+        $options = NOSQLApiHelper::getReadPreferenceOptions();
+        $indexes = $collection->listIndexes($options);
         foreach($indexes as $index) {
             $indexInfo = $index->__debugInfo();
             if (empty(array_diff(array_keys($index["key"]), array_keys($filters)))) {
@@ -234,7 +259,7 @@ final class NOSQLQuery {
     private static function composeFilter(array $criteria, \NOSQL\Dto\PropertyDto $property)
     {
         $filterValue = $criteria[$property->name];
-        $matchOperator = is_array($filterValue) ? $filterValue[0] : self::NOSQL_EQUAL_OPERATOR;
+        $matchOperator = is_array($filterValue) && count($filterValue) > 0 ? $filterValue[0] : self::NOSQL_EQUAL_OPERATOR;
         if (is_array($filterValue)) {
             if(in_array($matchOperator, [
                 self::NOSQL_NOT_NULL_OPERATOR,

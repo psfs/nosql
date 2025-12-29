@@ -2,6 +2,7 @@
 namespace NOSQL\Services;
 
 use MongoDB\Client;
+use MongoDB\Driver\ReadPreference;
 use NOSQL\Api\base\NOSQLBase;
 use NOSQL\Dto\Model\NOSQLModelDto;
 use NOSQL\Models\base\NOSQLModelTrait;
@@ -9,6 +10,7 @@ use NOSQL\Models\NOSQLActiveRecord;
 use PSFS\base\config\Config;
 use PSFS\base\exception\ApiException;
 use PSFS\base\Singleton;
+use ReflectionMethod;
 
 /**
  * Class ParserService
@@ -39,8 +41,13 @@ final class ParserService extends  Singleton {
             $dns .= '/' . $database . "?authSource=" . $authSource;
         }
         $dns .= '&retryWrites=true&w=majority';
-        $client = new Client($dns);
-        return $client->selectDatabase($database);
+
+	    if (defined('MongoDB\Driver\ReadPreference::PRIMARY')) {
+		    $client = new Client($dns, ['readPreference' => 'primary']);
+	    } else {
+		    $client = new Client($dns);
+	    }
+	    return $client->selectDatabase($database);
     }
 
     /**

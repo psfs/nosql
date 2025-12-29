@@ -1,0 +1,64 @@
+services:
+  php:
+    image: c15k02k18/php:8.3-alpine${DEBUG:-}
+    pull_policy: always
+    restart: always
+    tty: true
+    volumes:
+      - .:/var/www
+      - ./docker/php.ini:/usr/local/etc/php/php.ini
+    networks:
+      - psfs-network
+    working_dir: "/var/www"
+    ports:
+      - "${HOST_PORT:-8001}:8080"
+    command: 'php -S 0.0.0.0:8080 -t ./html'
+    environment:
+      XDEBUG_CONFIG: "remote_host=localhost"
+      PHP_IDE_CONFIG: "serverName=PSFSCore"
+      PHP_TIMEZONE: "${PHP_TIMEZONE:-Europe/Madrid}"
+      PHP_OPCACHE: "${PHP_OPCACHE:-0}"
+    depends_on:
+      - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    restart: always
+    image: redis:latest
+    networks:
+      - psfs-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    security_opt:
+      - no-new-privileges:true
+
+  nosql:
+    image: mongo:latest
+    restart: always
+    networks:
+      - psfs-network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-nosql}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-nosql}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-nosql}
+    ports:
+      - "${NOSQL_EXTERNAL_PORT:-27017}:27017"
+    healthcheck:
+      test: [ "CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+networks:
+  psfs-network:
+    driver: bridge

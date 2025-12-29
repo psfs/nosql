@@ -1,6 +1,7 @@
 <?php
 namespace NOSQL\Services\Helpers;
 
+use MongoDB\Driver\ReadPreference;
 use NOSQL\Dto\CollectionDto;
 use NOSQL\Services\Base\NOSQLBase;
 use PSFS\base\dto\Field;
@@ -20,7 +21,6 @@ class NOSQLApiHelper extends ApiHelper {
     private static function generateId() {
         $field = new Field('_id', t('Id'), Field::HIDDEN_TYPE);
         $field->readonly = true;
-        $field->readonly = true;
         $field->pk = true;
         return $field;
     }
@@ -29,6 +29,7 @@ class NOSQLApiHelper extends ApiHelper {
      * @param CollectionDto $collectionDto
      * @return Form
      * @throws \PSFS\base\exception\GeneratorException
+     * @throws \Exception
      */
     public static function parseForm(CollectionDto $collectionDto) {
         $form = new Form(false);
@@ -75,4 +76,17 @@ class NOSQLApiHelper extends ApiHelper {
         }
         return $form;
     }
+
+	/**
+	 * Method to avoid the warning for the deprecated constant ReadPreference::RP_PRIMARY
+	 * @return array
+	 */
+	public static function getReadPreferenceOptions()
+	{
+		$options = [];
+		if (defined('MongoDB\Driver\ReadPreference::PRIMARY')) {
+			$options['readPreference'] = new ReadPreference(ReadPreference::PRIMARY);
+		}
+		return $options;
+	}
 }

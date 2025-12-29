@@ -9,6 +9,7 @@ use NOSQL\Dto\Validation\JsonSchemaDto;
 use NOSQL\Dto\Validation\NumberPropertyDto;
 use NOSQL\Dto\Validation\StringPropertyDto;
 use NOSQL\Services\Base\NOSQLBase;
+use NOSQL\Services\Helpers\NOSQLApiHelper;
 use PSFS\base\Cache;
 use PSFS\base\config\Config;
 use PSFS\base\dto\Field;
@@ -197,8 +198,10 @@ class NOSQLService extends Service {
                 }
             }
             if(count($textIndexes)) {
-                $collection = $db->selectCollection($collectionDto['name']);
-                $collection->createIndex($textIndexes, ['name' => 'idx_text_' . $collectionDto['name']]);
+				$options = NOSQLApiHelper::getReadPreferenceOptions();
+                $collection = $db->selectCollection($collectionDto['name'], $options);
+				$options['name'] = 'idx_text_' . $collectionDto['name'];
+                $collection->createIndex($textIndexes, $options);
             }
         } catch (\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_DEBUG);
@@ -213,9 +216,10 @@ class NOSQLService extends Service {
      */
     private function createIndexes(Database $db, $collectionDto, array $indexes = []) {
         try {
-            $collection = $db->selectCollection($collectionDto['name']);
+			$options = NOSQLApiHelper::getReadPreferenceOptions();
+            $collection = $db->selectCollection($collectionDto['name'], $options);
             if(count($indexes)) {
-                $collection->createIndexes($indexes);
+                $collection->createIndexes($indexes, $options);
             }
         } catch (\Exception $exception) {
             Logger::log($exception->getMessage(), LOG_DEBUG);
@@ -235,11 +239,13 @@ class NOSQLService extends Service {
             $jsonSchema = $this->parseCollection($raw);
             try {
                 /** @var BSONDocument $result */
-                $db->createCollection($raw['name'], [
+                $result = $db->createCollection($raw['name'], [
                     'validation' => [
                         '$jsonSchema' => $jsonSchema->toArray(),
                     ]
                 ]);
+                $response = $result->getArrayCopy();
+                $success = array_key_exists('ok', $response) && $response['ok'] > 0;
             } catch(\Exception $exception) {
                 if($exception->getCode() !== 48) {
                     $success = false;
