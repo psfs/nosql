@@ -27,4 +27,3 @@ $serviceContainer->setLoggerConfiguration('defaultLogger', [
 	'bubble' => true,
 ]);
 
-require_once 'loadDatabase.php';
