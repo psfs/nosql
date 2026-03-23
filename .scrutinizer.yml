@@ -1,21 +1,3 @@
-checks:
-  php: true
-
-build:
-  environment:
-    php:
-      version: '8.2'
-      ini:
-        xdebug.mode: coverage
-  tests:
-    override:
-      - php-scrutinizer-run
-      -
-        command: 'vendor/bin/phpunit --coverage-clover=psfs-coverage'
-        coverage:
-          file: 'psfs-coverage'
-          format: 'clover'
-
 filter:
   excluded_paths:
     - src/bin/*
@@ -28,3 +10,48 @@ filter:
     - config/*
     - logs/*
     - vendor/*
+
+checks:
+  php: true
+
+tools:
+  php_cs_fixer:
+    config:
+      level: psr12
+
+build:
+  environment:
+    php:
+      version: '8.2'
+      ini:
+        memory_limit: "-1"
+        xdebug.mode: coverage
+  nodes:
+    analysis:
+      tests:
+        override:
+          - php-scrutinizer-run
+    services-tests:
+      services:
+        mongo: "8"
+        redis: "6"
+      environment:
+        variables:
+          APP_ENVIRONMENT: "test"
+          PSFS_REDIS_HOST: "127.0.0.1"
+          PSFS_REDIS_PORT: "6379"
+          PSFS_REDIS_TIMEOUT: "1.5"
+      dependencies:
+        override:
+          - composer install -o --no-interaction --no-progress --prefer-dist
+      project_setup:
+        override:
+          - true
+      tests:
+        stop_on_failure: true
+        override:
+          - command: "XDEBUG_MODE=coverage vendor/bin/phpunit --configuration src/NOSQL/phpunit.xml.dist --colors=never"
+            idle_timeout: 1200
+            coverage:
+              file: "cache/coverage/coverage.xml"
+              format: "clover"

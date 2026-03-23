@@ -1,4 +1,11 @@
 # PSFS NOSQL
+[![Build Status](https://scrutinizer-ci.com/g/psfs/nosql/badges/build.png?b=master)](https://scrutinizer-ci.com/g/psfs/nosql/build-status/master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/psfs/nosql/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/psfs/nosql/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/psfs/nosql/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/psfs/nosql/?branch=master)
+[![Packagist Stable Version](https://img.shields.io/packagist/v/psfs/nosql)](https://packagist.org/packages/psfs/nosql)
+[![PHP 8.3](https://img.shields.io/badge/PHP-8.3-777BB4.svg?logo=php&logoColor=white)](https://www.php.net/releases/8.3/en.php)
+
+
 
 NOSQL module for PSFS, aligned with the `psfs/core 2.2.x-dev` development line.
 
