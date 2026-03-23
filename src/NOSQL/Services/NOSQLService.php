@@ -20,6 +20,7 @@ use PSFS\base\Service;
 use PSFS\base\Template;
 use PSFS\base\types\helpers\GeneratorHelper;
 use PSFS\base\types\helpers\RouterHelper;
+use PSFS\base\types\helpers\attributes\Injectable;
 
 /**
 * Class NOSQLService
@@ -34,6 +35,7 @@ class NOSQLService extends Service {
      * @Injectable
      * @var \PSFS\base\Cache
      */
+    #[Injectable]
     protected $cache;
 
     /**

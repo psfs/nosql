@@ -8,6 +8,7 @@ use NOSQL\Services\Base\NOSQLManagerTrait;
 use PSFS\base\dto\JsonResponse;
 use PSFS\base\Logger;
 use PSFS\base\types\CustomApi;
+use PSFS\base\types\helpers\attributes\Injectable;
 
 /**
  * Class NOSQLBase
@@ -23,6 +24,7 @@ abstract class NOSQLBase extends CustomApi {
      * @Injectable
      * @var \NOSQL\Services\ParserService
      */
+    #[Injectable]
     protected $parser;
     /**
      * @var \MongoDB\Database

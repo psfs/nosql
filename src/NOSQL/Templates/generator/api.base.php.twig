@@ -3,6 +3,10 @@ namespace {{ domain }}\Api\Base;
 
 use \NOSQL\Api\base\NOSQLBase;
 use \{{ domain }}\Models\{{ model }} as {{ model }}Model;
+use PSFS\base\types\helpers\attributes\Cacheable;
+use PSFS\base\types\helpers\attributes\HttpMethod;
+use PSFS\base\types\helpers\attributes\Label;
+use PSFS\base\types\helpers\attributes\Route;
 
 /**
  * Class {{ model }}
@@ -15,10 +19,14 @@ abstract class {{ model }} extends NOSQLBase {
     * @label Get list of {__API__} documents filtered
     * @GET
     * @CACHE 600
-    * @ROUTE /{__DOMAIN__}/api/{__API__}
+    * @ROUTE /{__DOMAIN__}/Api/{__API__}
     *
     * @return \PSFS\base\dto\JsonResponse(data=[\{{ domain }}\Dto\{{ model }}])
     */
+    #[Label('Get list of {__API__} documents filtered')]
+    #[HttpMethod('GET')]
+    #[Cacheable('600')]
+    #[Route('/{__DOMAIN__}/Api/{__API__}')]
     public function modelList()
     {
         return parent::modelList();
@@ -29,12 +37,16 @@ abstract class {{ model }} extends NOSQLBase {
     *
     * @GET
     * @CACHE 600
-    * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
+    * @ROUTE /{__DOMAIN__}/Api/{__API__}/{pk}
     *
     * @param string $pk
     *
     * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     */
+    #[Label('Get unique document for {__API__}')]
+    #[HttpMethod('GET')]
+    #[Cacheable('600')]
+    #[Route('/{__DOMAIN__}/Api/{__API__}/{pk}')]
     public function get($pk)
     {
         return parent::get($pk);
@@ -44,12 +56,15 @@ abstract class {{ model }} extends NOSQLBase {
     * @label Delete {__API__} document
     *
     * @DELETE
-    * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
+    * @ROUTE /{__DOMAIN__}/Api/{__API__}/{pk}
     *
     * @param string $pk
     *
     * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     */
+    #[Label('Delete {__API__} document')]
+    #[HttpMethod('DELETE')]
+    #[Route('/{__DOMAIN__}/Api/{__API__}/{pk}')]
     public function delete($pk = NULL)
     {
         return parent::delete($pk);
@@ -60,10 +75,13 @@ abstract class {{ model }} extends NOSQLBase {
     *
     * @POST
     * @PAYLOAD \{{ domain }}\Dto\Models\{{ model }}
-    * @ROUTE /{__DOMAIN__}/api/{__API__}
+    * @ROUTE /{__DOMAIN__}/Api/{__API__}
     *
     * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     */
+    #[Label('Create a new {__API__} document')]
+    #[HttpMethod('POST')]
+    #[Route('/{__DOMAIN__}/Api/{__API__}')]
     public function post()
     {
         return parent::post();
@@ -74,13 +92,16 @@ abstract class {{ model }} extends NOSQLBase {
     *
     * @PUT
     * @PAYLOAD \{{ domain }}\Dto\Models\{{ model }}
-    * @ROUTE /{__DOMAIN__}/api/{__API__}/{pk}
+    * @ROUTE /{__DOMAIN__}/Api/{__API__}/{pk}
     *
     * @param string $pk
     *
     * @return \PSFS\base\dto\JsonResponse(data=\{{ domain }}\Dto\Models\{{ model }})
     *
     */
+    #[Label('Modify {__API__} document')]
+    #[HttpMethod('PUT')]
+    #[Route('/{__DOMAIN__}/Api/{__API__}/{pk}')]
     public function put($pk)
     {
         return parent::put($pk);
@@ -89,11 +110,14 @@ abstract class {{ model }} extends NOSQLBase {
     /**
     * @label Bulk insert for {__API__} documents
     * @POST
-    * @route /{__DOMAIN__}/api/{__API__}s
+    * @route /{__DOMAIN__}/Api/{__API__}s
     *
     * @payload [\{{ domain }}\Dto\Models\{{ model }}]
     * @return \PSFS\base\dto\JsonResponse(data=[\{{ domain }}\Dto\Models\{{ model }}])
     */
+    #[Label('Bulk insert for {__API__} documents')]
+    #[HttpMethod('POST')]
+    #[Route('/{__DOMAIN__}/Api/{__API__}s')]
     public function bulk()
     {
         return parent::bulk();

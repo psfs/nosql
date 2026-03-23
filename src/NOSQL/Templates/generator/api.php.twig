@@ -2,11 +2,13 @@
 namespace {{ domain }}\Api;
 
 use {{ domain }}\Api\Base\{{ model }} as {{ model }}Base;
+use PSFS\base\types\helpers\attributes\Api;
 /**
  * Class {{ model }}
  * @package {{ domain }}\Api
  * @Api {{ model }}
  */
+#[Api('{{ model }}')]
 final class {{ model }} extends {{ model }}Base {
 
 }

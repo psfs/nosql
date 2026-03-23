@@ -5,6 +5,10 @@ use NOSQL\Services\Helpers\NOSQLApiHelper;
 use PSFS\base\dto\JsonResponse;
 use PSFS\base\types\AuthAdminController;
 use PSFS\base\types\helpers\ApiFormHelper;
+use PSFS\base\types\helpers\attributes\HttpMethod;
+use PSFS\base\types\helpers\attributes\Label;
+use PSFS\base\types\helpers\attributes\Route;
+use PSFS\base\types\helpers\attributes\Visible;
 
 /**
  * Trait NOSQLManagetTrait
@@ -19,6 +23,10 @@ trait NOSQLManagerTrait {
      * @return \PSFS\base\dto\JsonResponse(data=\PSFS\base\dto\Form)
      * @throws \Exception
      */
+    #[Label('Returns form data for any nosql document')]
+    #[HttpMethod('POST')]
+    #[Visible(false)]
+    #[Route('/admin/api/form/{__DOMAIN__}/{__API__}/nosql')]
     public function getForm()
     {
         $form = NOSQLApiHelper::parseForm($this->getModel()->getSchema());
@@ -37,6 +45,9 @@ trait NOSQLManagerTrait {
      * @route /admin/{__DOMAIN__}/{__API__}/manager
      * @return string HTML
      */
+    #[Label('{__API__} NOSQL Manager')]
+    #[HttpMethod('GET')]
+    #[Route('/admin/{__DOMAIN__}/{__API__}/manager')]
     public function admin() {
         $domain = $this->getDomain();
         $api = $this->getApi();
