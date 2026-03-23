@@ -7,7 +7,6 @@ use MongoDB\Collection;
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use NOSQL\Dto\Model\ResultsetDto;
-use NOSQL\Models\base\NOSQLParserTrait;
 use NOSQL\Models\Query\NOSQLQueryPlanner;
 use PSFS\base\exception\ApiException;
 
@@ -43,7 +42,7 @@ final class NOSQLQuery
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($model, $con);
+        $con = $model::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name, self::buildDriverOptions());
 
         $result = $collection->findOne(['_id' => self::toObjectId($pk)], self::buildDriverOptions());
@@ -65,7 +64,7 @@ final class NOSQLQuery
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($model, $con);
+        $con = $model::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name, self::buildDriverOptions());
 
         $plan = self::buildQueryPlan($criteria, $model, $collection);
@@ -90,7 +89,7 @@ final class NOSQLQuery
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($model, $con);
+        $con = $model::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name, self::buildDriverOptions());
 
         $plan = self::buildQueryPlan($criteria, $model, $collection);
@@ -112,7 +111,7 @@ final class NOSQLQuery
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
-        $con = NOSQLParserTrait::initConnection($model, $con);
+        $con = $model::initConnection($model, $con);
         $collection = $con->selectCollection($model->getSchema()->name, self::buildDriverOptions());
 
         $plan = self::buildQueryPlan($criteria, $model, $collection);

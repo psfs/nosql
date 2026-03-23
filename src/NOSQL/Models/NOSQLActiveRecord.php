@@ -46,7 +46,7 @@ abstract class NOSQLActiveRecord {
     public function getDtoCopy($cleanPk = false) {
         $copy = clone $this->dto;
         if($cleanPk) {
-            $this->dto->resetPk();
+            $copy->resetPk();
         }
         return $copy;
     }
@@ -57,13 +57,23 @@ abstract class NOSQLActiveRecord {
 
     /**
      * @param Database|null $con
+     * @return Database
+     */
+    private function resolveConnection(Database $con = null): Database
+    {
+        if (null === $con) {
+            $con = ParserService::getInstance()->createConnection($this->getDomain());
+        }
+        return $con;
+    }
+
+    /**
+     * @param Database|null $con
      * @return bool
      */
     public function save(Database $con = null) {
         $saved = false;
-        if(null === $con) {
-            $con = ParserService::getInstance()->createConnection($this->getDomain());
-        }
+        $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             $isInsert = $isUpdate = false;
@@ -104,9 +114,7 @@ abstract class NOSQLActiveRecord {
      */
     public function update(Database $con = null) {
         $updated = false;
-        if(null === $con) {
-            $con = ParserService::getInstance()->createConnection($this->getDomain());
-        }
+        $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             $this->prepareData();
@@ -140,9 +148,7 @@ abstract class NOSQLActiveRecord {
      */
     public function bulkInsert(array $data, Database $con = null) {
         $inserts = 0;
-        if(null === $con) {
-            $con = ParserService::getInstance()->createConnection($this->getDomain());
-        }
+        $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             [$dtos, $data] = $this->prepareInsertDtos($data, $con);
@@ -164,9 +170,7 @@ abstract class NOSQLActiveRecord {
      * @return int
      */
     public function bulkUpsert(array $data, $id, Database $con = null) {
-        if(null === $con) {
-            $con = ParserService::getInstance()->createConnection($this->getDomain());
-        }
+        $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
 
         $upserts = 0;
@@ -210,9 +214,7 @@ abstract class NOSQLActiveRecord {
      */
     public function delete(Database $con = null) {
         $deleted = false;
-        if(null === $con) {
-            $con = ParserService::getInstance()->createConnection($this->getDomain());
-        }
+        $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             $this->preDelete($con);
@@ -239,9 +241,7 @@ abstract class NOSQLActiveRecord {
      */
     public function bulkDelete(array $filters, Database $con = null) {
         $deletedCount = 0;
-        if(null === $con) {
-            $con = ParserService::getInstance()->createConnection($this->getDomain());
-        }
+        $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
         try {
             $result = $collection->deleteMany($filters, NOSQLApiHelper::getReadPreferenceOptions());

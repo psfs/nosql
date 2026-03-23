@@ -11,7 +11,7 @@ services:
       - psfs-network
     working_dir: "/var/www"
     ports:
-      - "${HOST_PORT:-8001}:8080"
+      - "${HOST_PORT:-8002}:8080"
     command: 'php -S 0.0.0.0:8080 -t ./html'
     environment:
       XDEBUG_CONFIG: "remote_host=localhost"
@@ -28,18 +28,29 @@ services:
 
   redis:
     restart: always
-    image: redis:latest
+    image: valkey/valkey:latest
     networks:
       - psfs-network
-    command: redis-server --appendonly yes
+    command: [
+      "valkey-server",
+      "--appendonly", "no",
+      "--save", "",
+      "--maxmemory", "256M",
+      "--maxmemory-policy", "allkeys-lru"
+    ]
     healthcheck:
-      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      test: [ "CMD-SHELL", "valkey-cli ping | grep PONG" ]
       interval: 10s
       timeout: 3s
       retries: 5
       start_period: 5s
     security_opt:
       - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 256M
 
   nosql:
     image: mongo:latest

@@ -240,34 +240,46 @@ class NOSQLService extends Service {
         $collections = $this->getCollections($module);
         $success = true;
         foreach($collections as $raw) {
-            $jsonSchema = $this->parseCollection($raw);
-            try {
-                /** @var BSONDocument $result */
-                $result = $db->createCollection($raw['name'], [
-                    'validation' => [
-                        '$jsonSchema' => $jsonSchema->toArray(),
-                    ]
-                ]);
-                $response = $result->getArrayCopy();
-                $success = array_key_exists('ok', $response) && $response['ok'] > 0;
-            } catch(\Exception $exception) {
-                if($exception->getCode() !== 48) {
-                    $success = false;
-                }
-            }
-            if($success) {
-                if (Config::getParam("nosql.sync.defaultIndex", false, $module)) {
-                    $this->createTextIndex($db, $raw);
-                }
-                $indexToCreate = $this->getIndexPlanner()->buildIndexesForCollection(
-                    $raw,
-                    (bool)Config::getParam('nosql.sync.autoIndexes', false, $module)
-                );
-                $this->createIndexes($db, $raw, $indexToCreate);
-            }
-
+            $success = $this->syncCollection($db, $raw, $module) && $success;
         }
         return $success;
+    }
+
+    /**
+     * @param Database $db
+     * @param array $raw
+     * @param string $module
+     * @return bool
+     * @throws \PSFS\base\exception\GeneratorException
+     */
+    private function syncCollection(Database $db, array $raw, string $module): bool
+    {
+        $jsonSchema = $this->parseCollection($raw);
+        try {
+            /** @var BSONDocument $result */
+            $result = $db->createCollection($raw['name'], [
+                'validation' => [
+                    '$jsonSchema' => $jsonSchema->toArray(),
+                ]
+            ]);
+            $response = $result->getArrayCopy();
+            $success = array_key_exists('ok', $response) && $response['ok'] > 0;
+        } catch(\Exception $exception) {
+            $success = $exception->getCode() === 48;
+        }
+        if (!$success) {
+            return false;
+        }
+        if (Config::getParam("nosql.sync.defaultIndex", false, $module)) {
+            $this->createTextIndex($db, $raw);
+        }
+        $indexToCreate = $this->getIndexPlanner()->buildIndexesForCollection(
+            $raw,
+            (bool)Config::getParam('nosql.sync.autoIndexes', false, $module)
+        );
+        $this->createIndexes($db, $raw, $indexToCreate);
+
+        return true;
     }
 
     /**

@@ -52,7 +52,7 @@ build:
       tests:
         stop_on_failure: true
         override:
-          - command: "XDEBUG_MODE=coverage vendor/bin/phpunit --configuration src/NOSQL/phpunit.xml.dist --colors=never"
+          - command: "mkdir -p cache/coverage && XDEBUG_MODE=coverage vendor/bin/phpunit --configuration src/NOSQL/phpunit.xml.dist --colors=never --coverage-clover cache/coverage/coverage.xml"
             idle_timeout: 1200
             coverage:
               file: "cache/coverage/coverage.xml"
