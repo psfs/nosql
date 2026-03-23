@@ -43,7 +43,7 @@ build:
           PSFS_REDIS_TIMEOUT: "1.5"
       dependencies:
         override:
-          - composer install -o --no-interaction --no-progress --prefer-dist
+          - composer install -o --no-interaction --no-progress --prefer-dist --ignore-platform-req=ext-mongodb
       project_setup:
         override:
           - true

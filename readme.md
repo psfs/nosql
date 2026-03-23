@@ -82,6 +82,8 @@ Automatic index recommendations in `syncCollections` can be enabled with:
   - check that `metadata.attributes.enabled=true` in effective PSFS configuration.
 - MongoDB extension errors:
   - verify `ext-mongodb` is enabled in runtime (`php -m | grep mongodb`).
+- CI environments without native MongoDB extension:
+  - use `composer install --ignore-platform-req=ext-mongodb` for mock/stub-only test stages.
 
 ## Migration: annotations -> attributes
 
