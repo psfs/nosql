@@ -4,12 +4,11 @@ namespace NOSQL\Services;
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use NOSQL\Dto\CollectionDto;
-use NOSQL\Dto\Validation\EnumPropertyDto;
 use NOSQL\Dto\Validation\JsonSchemaDto;
-use NOSQL\Dto\Validation\NumberPropertyDto;
-use NOSQL\Dto\Validation\StringPropertyDto;
 use NOSQL\Services\Base\NOSQLBase;
 use NOSQL\Services\Helpers\NOSQLApiHelper;
+use NOSQL\Services\Sync\NOSQLIndexPlanner;
+use NOSQL\Services\Sync\NOSQLSchemaBuilder;
 use PSFS\base\Cache;
 use PSFS\base\config\Config;
 use PSFS\base\dto\Field;
@@ -34,6 +33,8 @@ class NOSQLService extends Service {
      * @var array
      */
     private $types = [];
+    private ?NOSQLIndexPlanner $indexPlanner = null;
+    private ?NOSQLSchemaBuilder $schemaBuilder = null;
 
     /**
      * @return array
@@ -226,34 +227,7 @@ class NOSQLService extends Service {
      */
     private function buildRecommendedIndexes(array $collectionDto): array
     {
-        $recommended = [];
-        $properties = $collectionDto['properties'] ?? [];
-        foreach ($properties as $property) {
-            $name = (string)($property['name'] ?? '');
-            $type = strtolower((string)($property['type'] ?? ''));
-            $required = (bool)($property['required'] ?? false);
-            if ($name === '' || !$required) {
-                continue;
-            }
-            if (!in_array($type, [
-                NOSQLBase::NOSQL_TYPE_INTEGER,
-                NOSQLBase::NOSQL_TYPE_DOUBLE,
-                NOSQLBase::NOSQL_TYPE_LONG,
-                NOSQLBase::NOSQL_TYPE_DATE,
-                NOSQLBase::NOSQL_TYPE_TIMESTAMP,
-                NOSQLBase::NOSQL_TYPE_BOOLEAN,
-                NOSQLBase::NOSQL_TYPE_STRING,
-            ], true)) {
-                continue;
-            }
-            $recommended[] = [
-                'key' => [$name => 1],
-                'name' => 'idx_auto_' . $collectionDto['name'] . '_' . $name,
-                'unique' => false,
-            ];
-        }
-
-        return $recommended;
+        return $this->getIndexPlanner()->buildRecommendedIndexes($collectionDto);
     }
 
     /**
@@ -285,32 +259,10 @@ class NOSQLService extends Service {
                 if (Config::getParam("nosql.sync.defaultIndex", false, $module)) {
                     $this->createTextIndex($db, $raw);
                 }
-                $indexToCreate = [];
-                foreach($raw['indexes'] as $index) {
-                    $dbIndex = [];
-                    foreach($index['properties'] as $idx) {
-                        list($property, $direction) = explode('.', $idx);
-                        switch(strtoupper($direction)) {
-                            case 'ASC': $dbIndex[$property] = 1; break;
-                            case 'DESC': $dbIndex[$property] = -1; break;
-                        }
-                    }
-                    $indexToCreate[] = [
-                        'key' => $dbIndex,
-                        'name' => $index['name'],
-                        'unique' => $index['unique'],
-                    ];
-                }
-                if ((bool)Config::getParam('nosql.sync.autoIndexes', false, $module)) {
-                    $indexToCreate = array_merge($indexToCreate, $this->buildRecommendedIndexes($raw));
-                }
-                $uniqueByName = [];
-                foreach ($indexToCreate as $idx) {
-                    if (!empty($idx['name']) && !array_key_exists($idx['name'], $uniqueByName)) {
-                        $uniqueByName[$idx['name']] = $idx;
-                    }
-                }
-                $indexToCreate = array_values($uniqueByName);
+                $indexToCreate = $this->getIndexPlanner()->buildIndexesForCollection(
+                    $raw,
+                    (bool)Config::getParam('nosql.sync.autoIndexes', false, $module)
+                );
                 $this->createIndexes($db, $raw, $indexToCreate);
             }
 
@@ -325,34 +277,7 @@ class NOSQLService extends Service {
      */
     private function parseCollection($raw)
     {
-        $jsonSchema = new JsonSchemaDto(false);
-        foreach ($raw['properties'] as $rawProperty) {
-            switch ($rawProperty['type']) {
-                case NOSQLBase::NOSQL_TYPE_INTEGER:
-                case NOSQLBase::NOSQL_TYPE_DOUBLE:
-                case NOSQLBase::NOSQL_TYPE_LONG:
-                    $property = new NumberPropertyDto(false);
-                    break;
-                case NOSQLBase::NOSQL_TYPE_ENUM:
-                    $property = new EnumPropertyDto(false);
-                    $property->enum = explode('|', $rawProperty['enum']);
-                    break;
-                default:
-                    $property = new StringPropertyDto(false);
-                    break;
-            }
-            if(array_key_exists('type', $rawProperty)) {
-                $property->bsonType = $rawProperty['type'];
-            }
-            if(array_key_exists('description', $rawProperty)) {
-                $property->description = $rawProperty['description'];
-            }
-            if (array_key_exists('required', $rawProperty) && $rawProperty['required']) {
-                $jsonSchema->required[] = $rawProperty['name'];
-            }
-            $jsonSchema->properties[$rawProperty['name']] = $property->toArray();
-        }
-        return $jsonSchema;
+        return $this->getSchemaBuilder()->buildCollectionSchema($raw);
     }
 
     /**
@@ -366,5 +291,23 @@ class NOSQLService extends Service {
             $validations[] = $validation;
         }
         return $validations;
+    }
+
+    private function getIndexPlanner(): NOSQLIndexPlanner
+    {
+        if (null === $this->indexPlanner) {
+            $this->indexPlanner = new NOSQLIndexPlanner();
+        }
+
+        return $this->indexPlanner;
+    }
+
+    private function getSchemaBuilder(): NOSQLSchemaBuilder
+    {
+        if (null === $this->schemaBuilder) {
+            $this->schemaBuilder = new NOSQLSchemaBuilder();
+        }
+
+        return $this->schemaBuilder;
     }
 }

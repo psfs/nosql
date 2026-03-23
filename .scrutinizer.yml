@@ -22,7 +22,9 @@ tools:
 build:
   environment:
     php:
-      version: '8.2'
+      version: '8.3'
+      pecl_extensions:
+        - mongodb
       ini:
         memory_limit: "-1"
         xdebug.mode: coverage
@@ -43,7 +45,7 @@ build:
           PSFS_REDIS_TIMEOUT: "1.5"
       dependencies:
         override:
-          - composer install -o --no-interaction --no-progress --prefer-dist --ignore-platform-req=ext-mongodb
+          - composer install -o --no-interaction --no-progress --prefer-dist
       project_setup:
         override:
           - true
