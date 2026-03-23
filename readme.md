@@ -50,6 +50,29 @@ vendor/bin/phpunit -c src/NOSQL/phpunit.xml.dist
 - Generator templates updated to emit attributes in newly generated code.
 - PHPUnit configuration migrated to 11.5 schema.
 - GitHub Actions CI added for `composer validate` + tests.
+- CRUD query planner optimized with:
+  - unified query plan for `find/count/deleteMany`
+  - strict custom pipeline whitelist
+  - index metadata caching
+  - cursor-mode pagination support (seek/after)
+  - optional query `hint`, `maxTimeMS`, and `allowDiskUse`
+  - configurable string filtering mode (`contains|prefix|exact`)
+
+## Query Planner Options
+
+The NOSQL CRUD query layer supports these optional request keys:
+
+- `__string_mode`: `contains` (default), `prefix`, or `exact`
+- `__cursor_mode`: `cursor`/`seek`/`after` to enable cursor pagination
+- `__after`: JSON object with sort field values for cursor pagination
+- `__hint`: index hint (string or object)
+- `__maxTimeMS`: max execution time for query operations
+- `__allowDiskUse`: enable disk usage for aggregation if needed
+- `__collation`: explicit collation object
+
+Automatic index recommendations in `syncCollections` can be enabled with:
+
+- `nosql.sync.autoIndexes=true`
 
 ## Quick Troubleshooting
 

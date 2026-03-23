@@ -221,6 +221,42 @@ class NOSQLService extends Service {
     }
 
     /**
+     * @param array $collectionDto
+     * @return array
+     */
+    private function buildRecommendedIndexes(array $collectionDto): array
+    {
+        $recommended = [];
+        $properties = $collectionDto['properties'] ?? [];
+        foreach ($properties as $property) {
+            $name = (string)($property['name'] ?? '');
+            $type = strtolower((string)($property['type'] ?? ''));
+            $required = (bool)($property['required'] ?? false);
+            if ($name === '' || !$required) {
+                continue;
+            }
+            if (!in_array($type, [
+                NOSQLBase::NOSQL_TYPE_INTEGER,
+                NOSQLBase::NOSQL_TYPE_DOUBLE,
+                NOSQLBase::NOSQL_TYPE_LONG,
+                NOSQLBase::NOSQL_TYPE_DATE,
+                NOSQLBase::NOSQL_TYPE_TIMESTAMP,
+                NOSQLBase::NOSQL_TYPE_BOOLEAN,
+                NOSQLBase::NOSQL_TYPE_STRING,
+            ], true)) {
+                continue;
+            }
+            $recommended[] = [
+                'key' => [$name => 1],
+                'name' => 'idx_auto_' . $collectionDto['name'] . '_' . $name,
+                'unique' => false,
+            ];
+        }
+
+        return $recommended;
+    }
+
+    /**
      * @param $module
      * @return bool
      * @throws \PSFS\base\exception\GeneratorException
@@ -265,6 +301,16 @@ class NOSQLService extends Service {
                         'unique' => $index['unique'],
                     ];
                 }
+                if ((bool)Config::getParam('nosql.sync.autoIndexes', false, $module)) {
+                    $indexToCreate = array_merge($indexToCreate, $this->buildRecommendedIndexes($raw));
+                }
+                $uniqueByName = [];
+                foreach ($indexToCreate as $idx) {
+                    if (!empty($idx['name']) && !array_key_exists($idx['name'], $uniqueByName)) {
+                        $uniqueByName[$idx['name']] = $idx;
+                    }
+                }
+                $indexToCreate = array_values($uniqueByName);
                 $this->createIndexes($db, $raw, $indexToCreate);
             }
 
