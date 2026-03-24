@@ -2,6 +2,7 @@
 namespace NOSQL\Dto\Model;
 
 use MongoDB\BSON\UTCDateTime;
+use MongoDB\Model\BSONArray;
 use NOSQL\Exceptions\NOSQLValidationException;
 use NOSQL\Services\Base\NOSQLBase;
 use PSFS\base\dto\Dto;
@@ -181,6 +182,8 @@ abstract class NOSQLModelDto extends Dto {
             case NOSQLBase::NOSQL_TYPE_ARRAY:
                 if (!is_array($value)) {
                     $errors[] = $property->getName();
+                } else {
+                    $property->setValue($this, new BSONArray($value));
                 }
                 break;
             case NOSQLBase::NOSQL_TYPE_BOOLEAN:
