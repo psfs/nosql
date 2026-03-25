@@ -37,7 +37,10 @@
     "autoload": {
         "psr-4": {
             "NOSQL\\": "src/NOSQL"
-        }
+        },
+        "exclude-from-classmap": [
+            "/src/NOSQL/Test/"
+        ]
     },
     "extra": {
         "branch-alias": {
