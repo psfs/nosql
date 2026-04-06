@@ -28,6 +28,7 @@ final class NOSQLQuery
     public const NOSQL_LESS_EQUAL_OPERATOR = '$lte';
     public const NOSQL_GREATER_OPERATOR = '$gt';
     public const NOSQL_GREATER_EQUAL_OPERATOR = '$gte';
+    public const NOSQL_ALL = '$all';
 
     private static ?NOSQLQueryPlanner $planner = null;
 

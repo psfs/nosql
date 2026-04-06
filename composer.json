@@ -42,6 +42,11 @@
             "/src/NOSQL/Test/"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "NOSQL\\Test\\": "src/NOSQL/Test/"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "1.0.x-dev"
