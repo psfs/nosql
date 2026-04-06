@@ -8,7 +8,7 @@
 >
     <testsuites>
         <testsuite name="NOSQL Suite Test">
-            <directory>./Test</directory>
+            <directory>../../tests/NOSQL</directory>
         </testsuite>
     </testsuites>
 
