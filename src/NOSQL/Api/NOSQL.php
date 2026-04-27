@@ -1,6 +1,7 @@
 <?php
 namespace NOSQL\Api;
 
+use NOSQL\Services\NOSQLService;
 use PSFS\base\dto\JsonResponse;
 use PSFS\base\Logger;
 use PSFS\base\types\CustomApi;
@@ -16,11 +17,7 @@ use PSFS\base\types\helpers\attributes\Route;
  */
 #[Api('__admin')]
 class NOSQL extends CustomApi {
-    /**
-     * @Injectable
-     * @var \NOSQL\Services\NOSQLService
-     */
-    #[Injectable]
+    #[Injectable(class:NOSQLService::class)]
     protected $srv;
 
     /**

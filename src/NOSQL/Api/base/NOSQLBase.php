@@ -1,10 +1,12 @@
 <?php
+
 namespace NOSQL\Api\base;
 
 use NOSQL\Dto\Model\ResultsetDto;
 use NOSQL\Models\NOSQLActiveRecord;
 use NOSQL\Models\NOSQLQuery;
 use NOSQL\Services\Base\NOSQLManagerTrait;
+use NOSQL\Services\ParserService;
 use PSFS\base\dto\JsonResponse;
 use PSFS\base\Logger;
 use PSFS\base\types\CustomApi;
@@ -16,15 +18,13 @@ use PSFS\base\types\helpers\attributes\Injectable;
  * @method NOSQLActiveRecord getModel()
  * @property NOSQLActiveRecord $model
  */
-abstract class NOSQLBase extends CustomApi {
+abstract class NOSQLBase extends CustomApi
+{
     use NOSQLManagerTrait;
 
     const NOSQL_MODEL_PRIMARY_KEY = '_id';
-    /**
-     * @Injectable
-     * @var \NOSQL\Services\ParserService
-     */
-    #[Injectable]
+
+    #[Injectable(class: ParserService::class)]
     protected $parser;
     /**
      * @var \MongoDB\Database
@@ -39,7 +39,9 @@ abstract class NOSQLBase extends CustomApi {
     /**
      * @param int $status
      */
-    public function closeTransaction($status) { }
+    public function closeTransaction($status)
+    {
+    }
 
     /**
      * @throws \NOSQL\Exceptions\NOSQLValidationException
@@ -58,7 +60,7 @@ abstract class NOSQLBase extends CustomApi {
     public function getApi()
     {
         $class = explode('\\', get_called_class());
-        return $class[count($class)-1];
+        return $class[count($class) - 1];
     }
 
     /**
@@ -84,7 +86,10 @@ abstract class NOSQLBase extends CustomApi {
             $code = 404;
             Logger::log($exception->getMessage(), LOG_WARNING, $this->query);
         }
-        return $this->json(new JsonResponse($results->items, $success, $results->count, ceil($results->count / $results->limit)), $code);
+        return $this->json(
+            new JsonResponse($results->items, $success, $results->count, ceil($results->count / $results->limit)),
+            $code
+        );
     }
 
     public function get($pk)
@@ -99,7 +104,10 @@ abstract class NOSQLBase extends CustomApi {
             $code = 404;
             Logger::log($exception->getMessage(), LOG_WARNING, [$pk]);
         }
-        return $this->json(new JsonResponse(null !== $this->model ? $this->getModel()->toArray() : [], $success), $code);
+        return $this->json(
+            new JsonResponse(null !== $this->model ? $this->getModel()->toArray() : [], $success),
+            $code
+        );
     }
 
     public function post()
@@ -133,7 +141,10 @@ abstract class NOSQLBase extends CustomApi {
         } finally {
             $code = $success && null === $code ? 200 : 400;
         }
-        return $this->json(new JsonResponse(null !== $this->model ? $this->getModel()->toArray() : [], $success, null, null, $message), $code);
+        return $this->json(
+            new JsonResponse(null !== $this->model ? $this->getModel()->toArray() : [], $success, null, null, $message),
+            $code
+        );
     }
 
     public function delete($pk = null)

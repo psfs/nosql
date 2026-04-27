@@ -1,5 +1,6 @@
 <?php
 namespace NOSQL\Controller\base;
+use NOSQL\Services\NOSQLService;
 use PSFS\base\types\AuthAdminController;
 use PSFS\base\types\helpers\attributes\Api;
 use PSFS\base\types\helpers\attributes\Injectable;
@@ -17,11 +18,7 @@ abstract class NOSQLBaseController extends AuthAdminController {
 
     const DOMAIN = 'NOSQL';
 
-    /**
-    * @Autoload
-    * @var \NOSQL\Services\NOSQLService
-    */
-    #[Injectable]
+    #[Injectable(class:NOSQLService::class)]
     protected $srv;
 
     /**
