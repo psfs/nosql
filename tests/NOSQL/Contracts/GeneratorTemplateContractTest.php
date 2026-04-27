@@ -8,7 +8,7 @@ final class GeneratorTemplateContractTest extends TestCase
 {
     public function testApiTemplateIncludesAttributeMetadataContract(): void
     {
-        $template = file_get_contents(__DIR__ . '/../../Templates/generator/api.php.twig');
+        $template = file_get_contents(__DIR__ . '/../../../src/NOSQL/Templates/generator/api.php.twig');
 
         self::assertIsString($template);
         self::assertStringContainsString("use PSFS\\base\\types\\helpers\\attributes\\Api;", $template);
@@ -17,7 +17,7 @@ final class GeneratorTemplateContractTest extends TestCase
 
     public function testApiBaseTemplateIncludesAttributeMetadataContract(): void
     {
-        $template = file_get_contents(__DIR__ . '/../../Templates/generator/api.base.php.twig');
+        $template = file_get_contents(__DIR__ . '/../../../src/NOSQL/Templates/generator/api.base.php.twig');
 
         self::assertIsString($template);
         self::assertStringContainsString('use PSFS\\base\\types\\helpers\\attributes\\HttpMethod;', $template);
