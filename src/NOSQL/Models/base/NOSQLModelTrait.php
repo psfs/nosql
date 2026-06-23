@@ -65,7 +65,7 @@ trait NOSQLModelTrait {
         $name = '';
         $sep = '';
         foreach($data as $key => $value) {
-            if($value instanceof ObjectId) {
+            if($value instanceof ObjectId && empty($this->dto->getPk())) {
                 $this->dto->setPk($value->jsonSerialize()['$oid']);
                 $name = $this->dto->getPk();
             } elseif($key === '_last_update') {
