@@ -135,7 +135,6 @@ final class NOSQLActiveRecordPersistenceTest extends TestCase
         $schema = new \stdClass();
         $schema->name = 'items';
         $schemaRef = new \ReflectionProperty(ActiveRecordStub::class, 'schema');
-        $schemaRef->setAccessible(true);
         $schemaRef->setValue($model, $schema);
 
         return $model;
@@ -144,7 +143,6 @@ final class NOSQLActiveRecordPersistenceTest extends TestCase
     private function setDto(ActiveRecordStub $model, ActiveRecordStubDto $dto): void
     {
         $dtoRef = new \ReflectionProperty(NOSQLActiveRecord::class, 'dto');
-        $dtoRef->setAccessible(true);
         $dtoRef->setValue($model, $dto);
     }
 }

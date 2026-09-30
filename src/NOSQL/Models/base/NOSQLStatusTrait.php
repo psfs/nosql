@@ -110,7 +110,7 @@ trait NOSQLStatusTrait {
      * @param Database|null $con
      * @throws \NOSQL\Exceptions\NOSQLValidationException
      */
-    public static function invokeHook(NOSQLActiveRecord $model, NOSQLModelDto $dto, $hook, Database $con = null) {
+    public static function invokeHook(NOSQLActiveRecord $model, NOSQLModelDto $dto, $hook, ?Database $con = null) {
         if(method_exists($model, $hook)) {
             $con = self::initConnection($model, $con);
             $model->feed($dto->toArray());

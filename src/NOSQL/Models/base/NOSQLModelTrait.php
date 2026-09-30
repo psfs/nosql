@@ -107,47 +107,47 @@ trait NOSQLModelTrait {
      * Before insert hook
      * @param Database $con
      */
-    protected function preInsert(Database $con = null) {}
+    protected function preInsert(?Database $con = null) {}
 
     /**
      * Before update hook
      * @param Database $con
      */
-    protected function preUpdate(Database $con = null) {}
+    protected function preUpdate(?Database $con = null) {}
 
     /**
      * Before save hook
      * @param Database $con
      */
-    protected function preSave(Database $con = null) {}
+    protected function preSave(?Database $con = null) {}
 
     /**
      * Before delete hook
      * @param Database $con
      */
-    protected function preDelete(Database $con = null) {}
+    protected function preDelete(?Database $con = null) {}
 
     /**
      * After insert hook
      * @param Database $con
      */
-    protected function postInsert(Database $con = null) {}
+    protected function postInsert(?Database $con = null) {}
 
     /**
      * After update hook
      * @param Database $con
      */
-    protected function postUpdate(Database $con = null) {}
+    protected function postUpdate(?Database $con = null) {}
 
     /**
      * After save hook
      * @param Database $con
      */
-    protected function postSave(Database $con = null) {}
+    protected function postSave(?Database $con = null) {}
 
     /**
      * After delete hook
      * @param Database $con
      */
-    protected function postDelete(Database $con = null) {}
+    protected function postDelete(?Database $con = null) {}
 }

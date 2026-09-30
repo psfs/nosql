@@ -1,6 +1,6 @@
 services:
   php:
-    image: c15k02k18/php:8.3-alpine${DEBUG:-}
+    image: stratecode/php:${PHP_VERSION:-8.3}${DEBUG:-}
     pull_policy: always
     restart: always
     tty: true
@@ -53,7 +53,7 @@ services:
           memory: 256M
 
   nosql:
-    image: mongo:latest
+    image: mongo:7.0
     restart: always
     networks:
       - psfs-network

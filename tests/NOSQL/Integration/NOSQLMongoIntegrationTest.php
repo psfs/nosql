@@ -48,7 +48,6 @@ final class NOSQLMongoIntegrationTest extends TestCase
 
         $router = (new \ReflectionClass(Router::class))->newInstanceWithoutConstructor();
         $domainsRef = new \ReflectionProperty(Router::class, 'domains');
-        $domainsRef->setAccessible(true);
         $domainsRef->setValue($router, [
             '@' . self::MODULE . '/' => ['base' => $this->moduleRoot],
         ]);
@@ -64,7 +63,6 @@ final class NOSQLMongoIntegrationTest extends TestCase
 
         $service = (new \ReflectionClass(NOSQLService::class))->newInstanceWithoutConstructor();
         $cacheRef = new \ReflectionProperty(SimpleService::class, 'cache');
-        $cacheRef->setAccessible(true);
         $cacheRef->setValue($service, Cache::getInstance());
 
         $collections = $service->getCollections(self::MODULE);

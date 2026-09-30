@@ -72,7 +72,6 @@ final class NOSQLApiControllerManagerTest extends TestCase
         $controller = new TestableNOSQLController();
         $router = (new \ReflectionClass(Router::class))->newInstanceWithoutConstructor();
         $domainsRef = new \ReflectionProperty(Router::class, 'domains');
-        $domainsRef->setAccessible(true);
         $domainsRef->setValue($router, [
             '@Sales/' => ['base' => '/tmp/sales/'],
         ]);
@@ -100,7 +99,6 @@ final class NOSQLApiControllerManagerTest extends TestCase
         $manager = new TestableManagerApi();
         $adminController = (new \ReflectionClass(AuthAdminController::class))->newInstanceWithoutConstructor();
         $tplRef = new \ReflectionProperty(\PSFS\base\types\Controller::class, 'tpl');
-        $tplRef->setAccessible(true);
         $tplRef->setValue($adminController, new class {
             public function render($template, array $vars = []): string
             {
@@ -122,7 +120,6 @@ final class NOSQLApiControllerManagerTest extends TestCase
     {
         $config = Config::getInstance();
         $property = new \ReflectionProperty(Config::class, 'config');
-        $property->setAccessible(true);
         $property->setValue($config, $map);
     }
 }
@@ -134,7 +131,6 @@ final class TestableNOSQLApi extends NOSQL
     public function setService(NOSQLService $service): void
     {
         $ref = new \ReflectionProperty(NOSQL::class, 'srv');
-        $ref->setAccessible(true);
         $ref->setValue($this, $service);
     }
 
@@ -200,7 +196,6 @@ final class TestableManagerApi
         /** @var NOSQLActiveRecord $model */
         $model = (new \ReflectionClass(TestableManagerModel::class))->newInstanceWithoutConstructor();
         $dtoRef = new \ReflectionProperty(NOSQLActiveRecord::class, 'dto');
-        $dtoRef->setAccessible(true);
         $dtoRef->setValue($model, new TestableManagerDto(false));
 
         $schema = new CollectionDto(false);
@@ -212,7 +207,6 @@ final class TestableManagerApi
         $field->description = 'Code';
         $schema->properties = [$field];
         $schemaRef = new \ReflectionProperty(TestableManagerModel::class, 'schema');
-        $schemaRef->setAccessible(true);
         $schemaRef->setValue($model, $schema);
 
         $this->model = $model;

@@ -91,7 +91,6 @@ final class NOSQLQueryBuilderBranchTest extends TestCase
         /** @var \NOSQL\Models\NOSQLActiveRecord $model */
         $model = (new \ReflectionClass(QueryBuilderModelStub::class))->newInstanceWithoutConstructor();
         $schemaRef = new \ReflectionProperty(QueryBuilderModelStub::class, 'schema');
-        $schemaRef->setAccessible(true);
         $schemaRef->setValue($model, (object)['properties' => $properties]);
         return $model;
     }

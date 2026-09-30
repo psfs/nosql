@@ -164,7 +164,7 @@ abstract class NOSQLModelDto extends Dto {
                     $errors[] = $property->getName();
                 } else {
                     if(NOSQLBase::NOSQL_TYPE_INTEGER === strtolower($type)) {
-                        $property->setValue($this, (integer)$value);
+                        $property->setValue($this, (int)$value);
                     } else {
                         $property->setValue($this, (float)$value);
                     }

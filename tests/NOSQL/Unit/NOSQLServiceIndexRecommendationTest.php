@@ -11,7 +11,6 @@ final class NOSQLServiceIndexRecommendationTest extends TestCase
     {
         $service = (new \ReflectionClass(NOSQLService::class))->newInstanceWithoutConstructor();
         $method = new \ReflectionMethod(NOSQLService::class, 'buildRecommendedIndexes');
-        $method->setAccessible(true);
 
         $indexes = $method->invoke($service, [
             'name' => 'orders',

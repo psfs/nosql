@@ -22,7 +22,6 @@ final class NOSQLTest extends TestCase
         $dto = new StubModelDto(false);
         $dto->setPk('507f1f77bcf86cd799439011');
         $property = new \ReflectionProperty(NOSQLActiveRecord::class, 'dto');
-        $property->setAccessible(true);
         $property->setValue($model, $dto);
 
         $copy = $model->getDtoCopy(true);
@@ -108,7 +107,6 @@ final class NOSQLTest extends TestCase
         $schema = new \stdClass();
         $schema->properties = [$schemaProperty];
         $schemaRef = new \ReflectionProperty(StubFilterActiveRecord::class, 'schema');
-        $schemaRef->setAccessible(true);
         $schemaRef->setValue($model, $schema);
 
         $filters = $builder->parseCriteria(

@@ -39,7 +39,7 @@ final class NOSQLQuery
      * @return mixed
      * @throws ApiException
      */
-    public static function findPk($modelName, $pk, Database $con = null)
+    public static function findPk($modelName, $pk, ?Database $con = null)
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
@@ -61,7 +61,7 @@ final class NOSQLQuery
      * @param Database|null $con
      * @return ResultsetDto
      */
-    public static function count($modelName, array $criteria, Database $con = null)
+    public static function count($modelName, array $criteria, ?Database $con = null)
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
@@ -86,7 +86,7 @@ final class NOSQLQuery
      * @param Database|null $con
      * @return int
      */
-    public static function deleteMany($modelName, array $criteria, Database $con = null)
+    public static function deleteMany($modelName, array $criteria, ?Database $con = null)
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();
@@ -108,7 +108,7 @@ final class NOSQLQuery
      * @throws \NOSQL\Exceptions\NOSQLValidationException
      * @throws \PSFS\base\exception\GeneratorException
      */
-    public static function find($modelName, array $criteria, Database $con = null, $asArray = false)
+    public static function find($modelName, array $criteria, ?Database $con = null, $asArray = false)
     {
         /** @var NOSQLActiveRecord $model */
         $model = new $modelName();

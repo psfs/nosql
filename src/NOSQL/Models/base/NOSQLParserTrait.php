@@ -100,7 +100,7 @@ trait NOSQLParserTrait {
      * @param NOSQLActiveRecord $model
      * @return Database
      */
-    public static function initConnection(NOSQLActiveRecord $model, Database $con = null)
+    public static function initConnection(NOSQLActiveRecord $model, ?Database $con = null)
     {
         if (null === $con) {
             $con = ParserService::getInstance()->createConnection($model->getDomain());

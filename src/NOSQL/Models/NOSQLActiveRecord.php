@@ -59,7 +59,7 @@ abstract class NOSQLActiveRecord {
      * @param Database|null $con
      * @return Database
      */
-    private function resolveConnection(Database $con = null): Database
+    private function resolveConnection(?Database $con = null): Database
     {
         if (null === $con) {
             $con = ParserService::getInstance()->createConnection($this->getDomain());
@@ -71,7 +71,7 @@ abstract class NOSQLActiveRecord {
      * @param Database|null $con
      * @return bool
      */
-    public function save(Database $con = null) {
+    public function save(?Database $con = null) {
         $saved = false;
         $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
@@ -112,7 +112,7 @@ abstract class NOSQLActiveRecord {
      * @param Database|null $con
      * @return bool
      */
-    public function update(Database $con = null) {
+    public function update(?Database $con = null) {
         $updated = false;
         $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
@@ -146,7 +146,7 @@ abstract class NOSQLActiveRecord {
      * @param Database|null $con
      * @return int
      */
-    public function bulkInsert(array $data, Database $con = null) {
+    public function bulkInsert(array $data, ?Database $con = null) {
         $inserts = 0;
         $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
@@ -169,7 +169,7 @@ abstract class NOSQLActiveRecord {
      * @param Database|null $con
      * @return int
      */
-    public function bulkUpsert(array $data, $id, Database $con = null) {
+    public function bulkUpsert(array $data, $id, ?Database $con = null) {
         $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
 
@@ -212,7 +212,7 @@ abstract class NOSQLActiveRecord {
      * @param Database|null $con
      * @return bool
      */
-    public function delete(Database $con = null) {
+    public function delete(?Database $con = null) {
         $deleted = false;
         $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());
@@ -239,7 +239,7 @@ abstract class NOSQLActiveRecord {
      * @param Database|null $con
      * @return int
      */
-    public function bulkDelete(array $filters, Database $con = null) {
+    public function bulkDelete(array $filters, ?Database $con = null) {
         $deletedCount = 0;
         $con = $this->resolveConnection($con);
         $collection = $con->selectCollection($this->getSchema()->name, NOSQLApiHelper::getReadPreferenceOptions());

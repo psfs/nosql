@@ -100,7 +100,6 @@ final class TestableParserModel extends \NOSQL\Models\NOSQLActiveRecord
     public function __construct()
     {
         $dtoRef = new \ReflectionProperty(\NOSQL\Models\NOSQLActiveRecord::class, 'dto');
-        $dtoRef->setAccessible(true);
         $dtoRef->setValue($this, new TestableParserDto(false));
     }
 }

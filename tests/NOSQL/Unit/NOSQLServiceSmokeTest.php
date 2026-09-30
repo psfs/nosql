@@ -21,7 +21,6 @@ final class NOSQLServiceSmokeTest extends TestCase
         ]);
 
         $cacheRef = new \ReflectionProperty(SimpleService::class, 'cache');
-        $cacheRef->setAccessible(true);
         $cacheRef->setValue($service, $cache);
 
         self::assertSame(['Billing', 'Orders'], $service->getDomains());
@@ -40,7 +39,6 @@ final class NOSQLServiceSmokeTest extends TestCase
     {
         $service = (new \ReflectionClass(NOSQLService::class))->newInstanceWithoutConstructor();
         $method = new \ReflectionMethod(NOSQLService::class, 'parseCollection');
-        $method->setAccessible(true);
 
         $schema = $method->invoke($service, [
             'properties' => [
