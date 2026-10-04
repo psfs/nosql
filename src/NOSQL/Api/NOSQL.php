@@ -78,7 +78,7 @@ class NOSQL extends CustomApi {
         $code = 200;
         try {
             $this->srv->setCollections($module, $this->getRequest()->getRawData());
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             $success = false;
             $code = 400;
             Logger::log($exception->getMessage(), LOG_WARNING);
@@ -98,7 +98,7 @@ class NOSQL extends CustomApi {
         $code = 200;
         try {
             $success = $this->srv->syncCollections($module);
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             $success = false;
             $code = 400;
             Logger::log($exception->getMessage(), LOG_WARNING);

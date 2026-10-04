@@ -171,7 +171,7 @@ class NOSQLService extends Service {
             try {
                 $this->cache->storeData($filename, $fileContent, Cache::TEXT, true);
                 $created = true;
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Logger::log($e->getMessage(), LOG_ERR);
             }
         } else {
@@ -198,7 +198,7 @@ class NOSQLService extends Service {
 				$options['name'] = 'idx_text_' . $collectionDto['name'];
                 $collection->createIndex($textIndexes, $options);
             }
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             Logger::log($exception->getMessage(), LOG_DEBUG);
         }
     }
@@ -216,7 +216,7 @@ class NOSQLService extends Service {
             if(count($indexes)) {
                 $collection->createIndexes($indexes, $options);
             }
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             Logger::log($exception->getMessage(), LOG_DEBUG);
         }
     }
@@ -263,7 +263,7 @@ class NOSQLService extends Service {
                 ]
             ]);
             $success = true;
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             $success = $exception->getCode() === 48;
         }
         if (!$success) {

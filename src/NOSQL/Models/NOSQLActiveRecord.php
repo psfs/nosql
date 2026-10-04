@@ -98,7 +98,7 @@ abstract class NOSQLActiveRecord {
                 $saved = true;
                 $this->countAction();
             }
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             if($exception instanceof NOSQLValidationException) {
                 throw $exception;
             } else {
@@ -131,7 +131,7 @@ abstract class NOSQLActiveRecord {
             $this->postUpdate($con);
             $updated = true;
             $this->countAction();
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             if($exception instanceof NOSQLValidationException) {
                 throw $exception;
             } else {
@@ -156,7 +156,7 @@ abstract class NOSQLActiveRecord {
             $ids = $result->getInsertedIds();
             $inserts = $this->parseInsertedDtos($con, $ids, $dtos);
             $this->setActionCount($inserts);
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $inserts;
@@ -201,7 +201,7 @@ abstract class NOSQLActiveRecord {
             /** @var BulkWriteResult $result */
             $result = $collection->bulkWrite($operations);
             $upserts = $result->getModifiedCount() + $result->getInsertedCount() + $result->getUpsertedCount();
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
 
@@ -227,7 +227,7 @@ abstract class NOSQLActiveRecord {
             $deleted = true;
             $this->dto = null;
             $this->countAction();
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $deleted;
@@ -246,7 +246,7 @@ abstract class NOSQLActiveRecord {
         try {
             $result = $collection->deleteMany($filters, NOSQLApiHelper::getReadPreferenceOptions());
             $deletedCount = $result->getDeletedCount();
-        } catch(\Exception $exception) {
+        } catch(\Throwable $exception) {
             Logger::log($exception->getMessage(), LOG_CRIT, $this->toArray());
         }
         return $deletedCount;

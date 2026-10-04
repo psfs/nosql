@@ -1,11 +1,7 @@
 language: php
 
 php:
-  - '7.0'
-  - '7.1'
-  - '7.2'
-  - '7.3'
-  - '7.4'
+  - '8.3'
 
 before_install:
   - pecl -q install mongodb && echo "extension=mongodb.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`

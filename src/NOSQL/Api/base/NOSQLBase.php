@@ -80,7 +80,7 @@ abstract class NOSQLBase extends CustomApi
             $className = get_called_class();
             $modelName = $className::MODEL_CLASS;
             $results = NOSQLQuery::find($modelName, $this->query, $this->con);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $results = new ResultsetDto(false);
             $success = false;
             $code = 404;
@@ -98,7 +98,7 @@ abstract class NOSQLBase extends CustomApi
         $code = 200;
         try {
             $this->feedModel($pk);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->model = null;
             $success = false;
             $code = 404;
@@ -116,7 +116,7 @@ abstract class NOSQLBase extends CustomApi
         $code = $message = null;
         try {
             $success = $this->getModel()->save($this->con);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $success = false;
             $message = $exception->getMessage();
             Logger::log($message, LOG_WARNING, $this->getModel()->toArray());
@@ -133,7 +133,7 @@ abstract class NOSQLBase extends CustomApi
             $this->feedModel($pk);
             $this->getModel()->feed($this->getRequest()->getData());
             $success = $this->getModel()->update($this->con);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->model = null;
             $success = false;
             $message = $exception->getMessage();
@@ -153,7 +153,7 @@ abstract class NOSQLBase extends CustomApi
         try {
             $this->feedModel($pk);
             $success = $this->getModel()->delete($this->con);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->model = null;
             $success = false;
             $code = 404;
@@ -171,7 +171,7 @@ abstract class NOSQLBase extends CustomApi
             $this->model = new $modelName();
             $inserts = $this->model->bulkInsert($this->getRequest()->getData());
             $success = $inserts > 0;
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $inserts = 0;
             $success = false;
             $code = 404;

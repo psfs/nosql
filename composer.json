@@ -5,7 +5,7 @@
     "homepage": "https://github.com/psfs/nosql",
     "type": "library",
     "require": {
-        "php": ">=8",
+        "php": "^8.3",
         "psfs/core": "dev-master",
         "ext-mongodb": "*",
         "mongodb/mongodb": "^2.4.1"
