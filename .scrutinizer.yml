@@ -44,7 +44,7 @@ build:
           PSFS_REDIS_TIMEOUT: "1.5"
       dependencies:
         override:
-          - sh install-xdebug-for-scrutinizer.sh
+          - sh prepare-test-runtime.sh
           - composer install -o --no-interaction --no-progress --prefer-dist
       project_setup:
         override:
@@ -52,8 +52,4 @@ build:
       tests:
         stop_on_failure: true
         override:
-          - command: "mkdir -p cache/coverage && XDEBUG_MODE=coverage vendor/bin/phpunit --configuration src/NOSQL/phpunit.xml.dist --colors=never --coverage-clover cache/coverage/coverage.xml"
-            idle_timeout: 1200
-            coverage:
-              file: "cache/coverage/coverage.xml"
-              format: "clover"
+          - sh scrutinizer-tests.sh
