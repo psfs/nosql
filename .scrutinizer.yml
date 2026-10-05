@@ -21,35 +21,33 @@ tools:
 
 build:
   environment:
-    php:
-      version: "8.3.33"
-      compile_options: "--without-pear"
-      pecl_extensions: []
-      ini:
-        memory_limit: "-1"
+    docker: true
+    variables:
+      PHP_VERSION: "8.3"
+      DEBUG: ""
   nodes:
     analysis:
+      dependencies:
+        override:
+          - docker compose up -d php redis nosql
+          - docker compose exec -T php sh prepare-test-runtime.sh
+          - docker compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
+      project_setup:
+        override:
+          - true
       tests:
         override:
           - php-scrutinizer-run
     services-tests:
-      services:
-        mongo: "8"
-        redis: "6"
-      environment:
-        variables:
-          APP_ENVIRONMENT: "test"
-          PSFS_REDIS_HOST: "127.0.0.1"
-          PSFS_REDIS_PORT: "6379"
-          PSFS_REDIS_TIMEOUT: "1.5"
       dependencies:
         override:
-          - sh prepare-test-runtime.sh
-          - composer install -o --no-interaction --no-progress --prefer-dist
+          - docker compose up -d php redis nosql
+          - docker compose exec -T php sh prepare-test-runtime.sh
+          - docker compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
       project_setup:
         override:
           - true
       tests:
         stop_on_failure: true
         override:
-          - sh scrutinizer-tests.sh
+          - docker compose exec -T -e PSFS_REDIS_HOST=redis -e APP_ENVIRONMENT=test php sh scrutinizer-tests.sh
