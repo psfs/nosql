@@ -28,9 +28,11 @@ build:
         memory_limit: "-1"
   nodes:
     analysis:
-      tests:
-        override:
-          - php-scrutinizer-run
+      commands:
+        - checkout-code ~/build
+        - cd ~/build && sh prepare-test-runtime.sh
+        - cd ~/build && composer install -o --no-interaction --no-progress --prefer-dist
+        - cd ~/build && php-scrutinizer-run
     services-tests:
       services:
         mongo: "8"
@@ -41,14 +43,9 @@ build:
           PSFS_REDIS_HOST: "127.0.0.1"
           PSFS_REDIS_PORT: "6379"
           PSFS_REDIS_TIMEOUT: "1.5"
-      dependencies:
-        override:
-          - sh prepare-test-runtime.sh
-          - composer install -o --no-interaction --no-progress --prefer-dist
-      project_setup:
-        override:
-          - true
-      tests:
-        stop_on_failure: true
-        override:
-          - sh scrutinizer-tests.sh
+      commands:
+        - checkout-code ~/build
+        - cd ~/build && sh prepare-test-runtime.sh
+        - cd ~/build && composer install -o --no-interaction --no-progress --prefer-dist
+        - command: cd ~/build && sh scrutinizer-tests.sh
+          idle_timeout: 1200
