@@ -29,9 +29,9 @@ build:
     analysis:
       dependencies:
         override:
-          - docker compose up -d php redis nosql
-          - docker compose exec -T php sh prepare-test-runtime.sh
-          - docker compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
+          - docker-compose up -d php redis nosql
+          - docker-compose exec -T php sh prepare-test-runtime.sh
+          - docker-compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
       project_setup:
         override:
           - true
@@ -41,13 +41,13 @@ build:
     services-tests:
       dependencies:
         override:
-          - docker compose up -d php redis nosql
-          - docker compose exec -T php sh prepare-test-runtime.sh
-          - docker compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
+          - docker-compose up -d php redis nosql
+          - docker-compose exec -T php sh prepare-test-runtime.sh
+          - docker-compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
       project_setup:
         override:
           - true
       tests:
         stop_on_failure: true
         override:
-          - docker compose exec -T -e PSFS_REDIS_HOST=redis -e APP_ENVIRONMENT=test php sh scrutinizer-tests.sh
+          - docker-compose exec -T -e PSFS_REDIS_HOST=redis -e APP_ENVIRONMENT=test php sh scrutinizer-tests.sh
