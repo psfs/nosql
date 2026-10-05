@@ -22,12 +22,11 @@ tools:
 build:
   environment:
     php:
-      version: '8.3'
+      version: "8.3.33"
       pecl_extensions:
         - mongodb
       ini:
         memory_limit: "-1"
-        xdebug.mode: coverage
   nodes:
     analysis:
       tests:
@@ -45,6 +44,7 @@ build:
           PSFS_REDIS_TIMEOUT: "1.5"
       dependencies:
         override:
+          - sh install-xdebug-for-scrutinizer.sh
           - composer install -o --no-interaction --no-progress --prefer-dist
       project_setup:
         override:
