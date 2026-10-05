@@ -23,8 +23,7 @@ build:
   environment:
     php:
       version: "8.3.33"
-      pecl_extensions:
-        - mongodb
+      pecl_extensions: []
       ini:
         memory_limit: "-1"
   nodes:
