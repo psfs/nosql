@@ -26,19 +26,30 @@ build:
       PHP_VERSION: "8.3"
       DEBUG: "-xdebug"
   nodes:
-    analysis: []
-    code-analysis:
+    analysis:
       commands:
         - checkout-code ~/build
-        - cd ~/build && docker-compose up -d php redis nosql
-        - cd ~/build && docker-compose exec -T php sh prepare-test-runtime.sh
-        - cd ~/build && docker-compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml up -d php redis nosql
+        - cd ~/build && docker cp ./. $(docker-compose -f docker-compose.scrutinizer.yml ps -q php):/var/www
+        - cd ~/build && docker cp docker/php.ini $(docker-compose -f docker-compose.scrutinizer.yml ps -q php):/usr/local/etc/php/php.ini
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml ps && docker-compose -f docker-compose.scrutinizer.yml logs --tail=20 php redis nosql
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml exec -T php apk add --no-cache autoconf g++ gcc libc-dev make pkgconf re2c
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml exec -T php sh prepare-test-runtime.sh
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml exec -T -e XDEBUG_MODE=off php composer install -o --no-interaction --no-progress --prefer-dist
+        - cd ~/build && docker cp $(docker-compose -f docker-compose.scrutinizer.yml ps -q php):/var/www/vendor ./vendor
         - cd ~/build && php-scrutinizer-run
     services-tests:
       commands:
         - checkout-code ~/build
-        - cd ~/build && docker-compose up -d php redis nosql
-        - cd ~/build && docker-compose exec -T php sh prepare-test-runtime.sh
-        - cd ~/build && docker-compose exec -T php composer install -o --no-interaction --no-progress --prefer-dist
-        - command: cd ~/build && docker-compose exec -T -e PSFS_REDIS_HOST=redis -e APP_ENVIRONMENT=test php sh scrutinizer-tests.sh
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml up -d php redis nosql
+        - cd ~/build && docker cp ./. $(docker-compose -f docker-compose.scrutinizer.yml ps -q php):/var/www
+        - cd ~/build && docker cp docker/php.ini $(docker-compose -f docker-compose.scrutinizer.yml ps -q php):/usr/local/etc/php/php.ini
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml ps && docker-compose -f docker-compose.scrutinizer.yml logs --tail=20 php redis nosql
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml exec -T php apk add --no-cache autoconf g++ gcc libc-dev make pkgconf re2c
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml exec -T php sh prepare-test-runtime.sh
+        - cd ~/build && docker-compose -f docker-compose.scrutinizer.yml exec -T -e XDEBUG_MODE=off php composer install -o --no-interaction --no-progress --prefer-dist
+        - command: cd ~/build && docker-compose -f docker-compose.scrutinizer.yml exec -T -e XDEBUG_MODE=coverage -e PSFS_REDIS_HOST=redis -e APP_ENVIRONMENT=test php sh scrutinizer-tests.sh && mkdir -p cache/coverage && docker cp $(docker-compose -f docker-compose.scrutinizer.yml ps -q php):/var/www/cache/coverage/coverage.xml ./cache/coverage/coverage.xml
           idle_timeout: 1200
+          coverage:
+            file: cache/coverage/coverage.xml
+            format: clover

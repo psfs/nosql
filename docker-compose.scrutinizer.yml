@@ -1,0 +1,25 @@
+version: '3.3'
+
+services:
+  php:
+    image: stratecode/php:${PHP_VERSION:-8.3}${DEBUG:-}
+    working_dir: /var/www
+    command: sleep 86400
+    environment:
+      XDEBUG_MODE: coverage
+      PHP_TIMEZONE: Europe/Madrid
+      PHP_OPCACHE: '0'
+    depends_on:
+      - redis
+      - nosql
+
+  redis:
+    image: valkey/valkey:latest
+    command: ["valkey-server", "--appendonly", "no", "--save", ""]
+
+  nosql:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: nosql
+      MONGO_INITDB_ROOT_PASSWORD: nosql
+      MONGO_INITDB_DATABASE: nosql
