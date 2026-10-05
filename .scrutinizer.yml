@@ -24,11 +24,10 @@ build:
     docker: true
     variables:
       PHP_VERSION: "8.3"
-      DEBUG: ""
+      DEBUG: "-xdebug"
   nodes:
-    analysis:
-      project_setup: null
-      tests: null
+    analysis: false
+    code-analysis:
       commands:
         - checkout-code ~/build
         - cd ~/build && docker-compose up -d php redis nosql
